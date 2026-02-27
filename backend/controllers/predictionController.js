@@ -24,8 +24,9 @@ exports.getPrediction = async (req, res) => {
             diabetesPedigreeFunction, genetics
         } = req.body;
 
-        console.log("Calling ML service at http://localhost:5000/predict");
-        const mlResponse = await axios.post('http://localhost:5000/predict', {
+        const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
+        console.log(`Calling ML service at ${mlServiceUrl}/predict`);
+        const mlResponse = await axios.post(`${mlServiceUrl}/predict`, {
             pregnancies, glucose, bloodPressure, skinThickness,
             insulin, bmi, diabetesPedigreeFunction, age, genetics
         });
