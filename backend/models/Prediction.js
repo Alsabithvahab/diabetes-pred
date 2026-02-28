@@ -5,7 +5,7 @@ const PredictionSchema = new mongoose.Schema({
     age: { type: Number, required: true },
     glucose: { type: Number, required: true },
     bloodPressure: { type: Number, required: true },
-    bmi: { type: Number, required: true },
+    bmi: { type: Number, required: false },
     genetics: { type: String, required: true },
     location: { type: String, required: true },
     probability: { type: Number, required: true },
@@ -17,6 +17,7 @@ const PredictionSchema = new mongoose.Schema({
             effect: String
         }
     ],
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     date: { type: Date, default: Date.now }
 });
 

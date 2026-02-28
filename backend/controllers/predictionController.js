@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
@@ -18,11 +19,16 @@ const writeLocal = (data) => {
 exports.getPrediction = async (req, res) => {
     try {
         console.log("Received prediction request:", req.body);
-        const {
+        let {
             name, location, age, pregnancies, glucose,
             bloodPressure, skinThickness, insulin, bmi,
             diabetesPedigreeFunction, genetics
         } = req.body;
+
+        // Apply defaults if missing (for cases where they are removed from UI)
+        if (skinThickness === undefined) skinThickness = 0;
+        if (bmi === undefined) bmi = 25.0;
+        if (diabetesPedigreeFunction === undefined) diabetesPedigreeFunction = 0.47;
 
         const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
         console.log(`Calling ML service at ${mlServiceUrl}/predict`);
@@ -37,6 +43,7 @@ exports.getPrediction = async (req, res) => {
         const result = {
             name, age, glucose, bloodPressure, bmi, genetics, location,
             probability, riskLevel: risk_level, shapSummary: shap_values,
+            userId: req.user.id,
             date: new Date()
         };
 
@@ -66,9 +73,10 @@ exports.getPrediction = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Prediction Error:", error.message);
+        console.error("Prediction Error:", error);
         if (error.response) {
             console.error("ML Service Error Response:", error.response.data);
+            return res.status(error.response.status).json({ success: false, message: error.response.data.message || error.message });
         }
         res.status(500).json({ success: false, message: error.message });
     }
@@ -78,9 +86,11 @@ exports.getHistory = async (req, res) => {
     try {
         let history;
         if (global.dbConnected) {
-            history = await Prediction.find().sort({ date: -1 });
+            history = await Prediction.find({ userId: req.user.id }).sort({ date: -1 });
         } else {
-            history = readLocal().sort((a, b) => new Date(b.date) - new Date(a.date));
+            history = readLocal()
+                .filter(h => h.userId === req.user.id)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
         }
         res.status(200).json({ success: true, data: history });
     } catch (error) {
@@ -94,10 +104,11 @@ exports.getAnalytics = async (req, res) => {
         let analytics;
         if (global.dbConnected) {
             analytics = await Prediction.aggregate([
+                { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
                 { $group: { _id: "$location", count: { $sum: 1 } } }
             ]);
         } else {
-            const history = readLocal();
+            const history = readLocal().filter(h => h.userId === req.user.id);
             const counts = {};
             history.forEach(h => { counts[h.location] = (counts[h.location] || 0) + 1; });
             analytics = Object.keys(counts).map(loc => ({ _id: loc, count: counts[loc] }));

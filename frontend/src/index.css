@@ -76,6 +76,17 @@ body {
     transform: scale(1.02);
 }
 
+.btn-danger {
+    background: var(--high);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: scale(1.02);
+}
+
 .form-header {
     text-align: left;
     margin-bottom: 2rem;
@@ -167,6 +178,105 @@ body {
     .form-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Redesigned Auth Styles */
+.auth-container {
+    max-width: 450px;
+    margin: 4rem auto;
+    padding: 2rem;
+}
+
+.auth-header h1 {
+    font-size: 2.5rem;
+    color: #4a4a4a;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.auth-form-group {
+    margin-bottom: 1.2rem;
+    position: relative;
+}
+
+.auth-form-group label {
+    display: block;
+    font-weight: 500;
+    color: #4a4a4a;
+    margin-bottom: 0.5rem;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: #5f7fff;
+    box-shadow: 0 0 0 3px rgba(95, 127, 255, 0.1);
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 2.7rem;
+    cursor: pointer;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 0.9rem;
+    background: #5f7fff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 1rem;
+}
+
+.auth-button:hover {
+    background: #4a6fff;
+}
+
+.auth-footer {
+    text-align: left;
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    color: #4a4a4a;
+}
+
+.auth-link {
+    color: #5f7fff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+.forgot-password {
+    display: block;
+    margin: 1rem 0;
+    color: #5f7fff;
+    text-decoration: none;
 }
 
 /* Feature Cards Styles */

@@ -46,8 +46,7 @@ const CookieBanner = () => {
 export default function Home() {
     const [form, setForm] = useState({
         name: '', location: '', age: '', pregnancies: '0',
-        glucose: '', bloodPressure: '', skinThickness: '',
-        insulin: '', bmi: '', diabetesPedigreeFunction: '0.47', genetics: 'No'
+        glucose: '', bloodPressure: '', insulin: '', genetics: 'No'
     });
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -64,10 +63,10 @@ export default function Home() {
                 pregnancies: Number(form.pregnancies),
                 glucose: Number(form.glucose),
                 bloodPressure: Number(form.bloodPressure),
-                skinThickness: Number(form.skinThickness),
                 insulin: Number(form.insulin),
-                bmi: Number(form.bmi),
-                diabetesPedigreeFunction: Number(form.diabetesPedigreeFunction)
+                skinThickness: 0,
+                bmi: 25.0,
+                diabetesPedigreeFunction: 0.47
             });
             navigate('/result', { state: { result: res.data.data, input: form } });
         } catch (err) {
@@ -119,25 +118,12 @@ export default function Home() {
                             <input name="bloodPressure" type="number" placeholder="60-120" onChange={handle} required />
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">📏 Skin Thickness (mm)</label>
-                            <input name="skinThickness" type="number" placeholder="0-99" onChange={handle} required />
-                        </div>
 
                         <div className="form-group">
                             <label className="form-label">💉 Insulin (mu U/ml)</label>
                             <input name="insulin" type="number" placeholder="0-846" onChange={handle} required />
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">⚖️ BMI (kg/m²)</label>
-                            <input name="bmi" type="number" step="0.1" placeholder="18-60" onChange={handle} required />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">📊 Pedigree Function</label>
-                            <input name="diabetesPedigreeFunction" type="number" step="0.001" placeholder="0.08-2.42" onChange={handle} required />
-                        </div>
 
                         <div className="form-group">
                             <label className="form-label">📅 Age</label>

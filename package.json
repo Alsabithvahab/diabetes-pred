@@ -1,0 +1,15 @@
+{
+  "name": "diabetes-prediction-system",
+  "version": "1.0.0",
+  "description": "Integrated Diabetes Prediction System",
+  "scripts": {
+    "install-all": "npm install --prefix frontend && npm install --prefix backend",
+    "start-frontend": "npm start --prefix frontend",
+    "start-backend": "node backend/server.js",
+    "start-ml": "python ml-service/app.py",
+    "dev": "npx concurrently \"npm run start-ml\" \"npm run start-backend\" \"npm run start-frontend\""
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const predictionRoutes = require('./routes/predictionRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 const app = express();
@@ -12,6 +13,7 @@ app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
 });
+app.use('/api/auth', authRoutes);
 app.use('/api', predictionRoutes);
 
 const PORT = process.env.PORT || 5001;
