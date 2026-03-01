@@ -166,7 +166,7 @@ export default function Result() {
 
                 {/* Recommendations Section */}
                 <div className="card">
-                    <h3>📋 Personalized Plan</h3>
+                    <h3>📋 Personalized recommendation</h3>
                     <div className="recommendations-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '1rem' }}>
                         {['Diet', 'Exercise', 'Lifestyle'].map(category => {
                             const items = recommendations.filter(r => r.startsWith(`[${category}]`));

@@ -37,29 +37,39 @@ def get_recommendations(data):
     if glucose > 140:
         recs["Diet"].append(f"Your glucose ({glucose} mg/dL) is high. Prioritize low-glycemic foods like leafy greens, legumes, and whole grains.")
         recs["Diet"].append("Strictly limit sugary beverages and refined white flour products.")
+        recs["Diet"].append("Consider intermittent fasting (e.g., 16:8) under medical supervision to improve insulin sensitivity.")
+        recs["Diet"].append("Increase fiber intake to 25-30g daily to slow glucose absorption.")
     elif glucose > 100:
         recs["Diet"].append("Monitor carbohydrate portions and choose complex carbs over simple sugars.")
+        recs["Diet"].append("Include healthy fats like avocados and nuts to stabilize energy levels.")
     
     if bp > 90:
         recs["Diet"].append("Incorporate the DASH diet (Dietary Approaches to Stop Hypertension), focusing on fruits, vegetables, and low-fat dairy.")
         recs["Diet"].append("Limit sodium (salt) intake to less than 2,300 mg per day.")
+        recs["Diet"].append("Increase potassium-rich foods like bananas and spinach to help balance sodium levels.")
 
     # Exercise Recommendations
     if bmi > 25:
         recs["Exercise"].append(f"With a BMI of {bmi}, aim for 150-300 minutes of moderate-intensity aerobic activity per week.")
         recs["Exercise"].append("Include strength training twice a week to improve metabolic rate.")
+        recs["Exercise"].append("Try High-Intensity Interval Training (HIIT) to burn more calories in less time.")
+        recs["Exercise"].append("Increase non-exercise activity thermogenesis (NEAT) by taking the stairs and walking more.")
     else:
         recs["Exercise"].append("Keep up a regular routine of 30 minutes of daily physical activity.")
+        recs["Exercise"].append("Incorporate flexibility and balance exercises like Yoga or Pilates.")
 
     # Lifestyle & Medical
     if genetics == 1:
         recs["Lifestyle"].append("High genetic risk detected. Ensure clinical screenings are done every 3-6 months.")
+        recs["Lifestyle"].append("Discuss preventative strategies with your healthcare provider early.")
     
     if bp > 90:
         recs["Lifestyle"].append("Practice stress-management techniques like yoga or deep breathing to help manage blood pressure.")
+        recs["Lifestyle"].append("Aim for consistent sleep patterns; poor sleep is linked to higher blood pressure.")
     
     if age > 45:
         recs["Lifestyle"].append("Regular cardiovascular health checks are vital above age 45.")
+        recs["Lifestyle"].append("Consider a comprehensive metabolic panel to screen for related conditions.")
 
     # Flatten categories for display
     final_recs = []
