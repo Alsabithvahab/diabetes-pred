@@ -88,29 +88,31 @@ export default function Dashboard() {
         predictions.forEach(p => {
             const loc = p.location || 'Unknown';
             if (!stats[loc]) {
-                stats[loc] = { total: 0, users: new Set() };
+                stats[loc] = { total: 0, names: new Set() };
             }
             stats[loc].total += 1;
-            const uid = p.userId?._id || p.userId || p.name; // Fallback to name if ID missing
-            stats[loc].users.add(uid);
+            // Count by unique name per location
+            const name = p.name || 'Anonymous';
+            stats[loc].names.add(name);
         });
 
-        // Sort by total volume
+        // Sort by number of unique names
         const filtered = Object.entries(stats)
-            .sort((a, b) => b[1].users.size - a[1].users.size);
+            .sort((a, b) => b[1].names.size - a[1].names.size);
 
         return {
-            labels: filtered.map(([loc]) => loc.split(',')[0]), // Just the city/district name
+            labels: filtered.map(([loc]) => loc.split(',')[0]),
             datasets: [
                 {
                     label: 'Number of Users',
-                    data: filtered.map(([, s]) => s.users.size),
+                    data: filtered.map(([, s]) => s.names.size),
                     backgroundColor: '#3b82f6',
                     borderRadius: 6
                 }
             ]
         };
     }, [predictions]);
+
 
     const chartOptions = {
         responsive: true,
@@ -191,73 +193,78 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1.5rem', alignItems: 'start' }}>
-                <div className="card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ margin: 0 }}>Detailed Assessments</h3>
-                        <input
-                            type="text"
-                            placeholder="Search patient or location..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', width: '250px' }}
-                        />
-                    </div>
-
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border)' }}>
-                                    <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('date')}>Date <SortIcon column="date" /></th>
-                                    <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('name')}>Patient <SortIcon column="name" /></th>
-                                    <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('location')}>Location <SortIcon column="location" /></th>
-                                    <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('riskLevel')}>Risk <SortIcon column="riskLevel" /></th>
-                                    <th style={{ padding: '1rem' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {sortedPredictions.map((p) => (
-                                    <tr key={p._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                        <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{new Date(p.date).toLocaleDateString()}</td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <div style={{ fontWeight: 600 }}>{p.name}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.userId?.email || 'N/A'}</div>
-                                        </td>
-                                        <td style={{ padding: '1rem', fontSize: '0.9rem' }}>📍 {p.location}</td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <span className={`risk-badge risk-${p.riskLevel?.toLowerCase()}`}>
-                                                {p.riskLevel}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '1rem' }}>
-                                            <button
-                                                onClick={() => handleDelete(p._id)}
-                                                className="btn btn-danger"
-                                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
-                                            >
-                                                Remove
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div className="card">
-                    <h3 style={{ marginBottom: '1.5rem' }}>📊 Usage Analytics by Location</h3>
-                    <div style={{ height: '300px' }}>
-                        {locationAnalytics.labels.length > 0 ? (
-                            <Bar data={locationAnalytics} options={chartOptions} />
-                        ) : (
-                            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                                No data available yet
-                            </div>
-                        )}
-                    </div>
+            {/* Location Analytics Graph Section */}
+            <div className="card" style={{ marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    📊 Usage Analytics: System Reach
+                </h3>
+                <div style={{ height: '350px' }}>
+                    {locationAnalytics.labels.length > 0 ? (
+                        <Bar data={locationAnalytics} options={chartOptions} />
+                    ) : (
+                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                            No data available yet
+                        </div>
+                    )}
                 </div>
             </div>
+
+
+            {/* Detailed Assessments Table Section */}
+            <div className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h3 style={{ margin: 0 }}>Patient Oversight & Records</h3>
+                    <input
+                        type="text"
+                        placeholder="Search patient or location..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1px solid var(--border)', width: '300px' }}
+                    />
+                </div>
+
+
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border)' }}>
+                                <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('date')}>Date <SortIcon column="date" /></th>
+                                <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('name')}>Patient <SortIcon column="name" /></th>
+                                <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('location')}>Location <SortIcon column="location" /></th>
+                                <th style={{ padding: '1rem', cursor: 'pointer' }} onClick={() => handleSort('riskLevel')}>Risk <SortIcon column="riskLevel" /></th>
+                                <th style={{ padding: '1rem' }}>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedPredictions.map((p) => (
+                                <tr key={p._id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                    <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{new Date(p.date).toLocaleDateString()}</td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <div style={{ fontWeight: 600 }}>{p.name}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.userId?.email || 'N/A'}</div>
+                                    </td>
+                                    <td style={{ padding: '1rem', fontSize: '0.9rem' }}>📍 {p.location}</td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <span className={`risk-badge risk-${p.riskLevel?.toLowerCase()}`}>
+                                            {p.riskLevel}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '1rem' }}>
+                                        <button
+                                            onClick={() => handleDelete(p._id)}
+                                            className="btn btn-danger"
+                                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}
+                                        >
+                                            Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     );
 }

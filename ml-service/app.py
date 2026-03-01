@@ -4,8 +4,6 @@ import joblib
 import pandas as pd
 import numpy as np
 import shap
-import lime
-import lime.lime_tabular
 import os
 
 app = Flask(__name__)
@@ -161,15 +159,6 @@ def predict():
             "effect": "Increase" if val > 0 else "Decrease"
         })
 
-    lime_explainer = lime.lime_tabular.LimeTabularExplainer(
-        X_train.values, 
-        feature_names=features, 
-        class_names=['No', 'Yes'], 
-        mode='classification'
-    )
-    exp = lime_explainer.explain_instance(X_scaled[0], model.predict_proba, num_features=len(features))
-    lime_explanation = [{"feature": x[0], "weight": x[1]} for x in exp.as_list()]
-
     cf_message, _ = get_counterfactuals(input_data)
     recs = get_recommendations(input_data)
 
@@ -177,7 +166,6 @@ def predict():
         "probability": float(prob), 
         "risk_level": risk_level,
         "shap_values": shap_summary, 
-        "lime_explanation": lime_explanation,
         "counterfactual": cf_message, 
         "recommendations": recs
     })

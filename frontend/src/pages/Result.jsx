@@ -11,7 +11,7 @@ export default function Result() {
 
     if (!state?.result || !state?.input) return null;
 
-    const { probability, risk_level, shap_values, lime_explanation, counterfactual, recommendations } = state.result;
+    const { probability, risk_level, shap_values, counterfactual, recommendations } = state.result;
     const { name, age, location, height, weight, glucose, bloodPressure, insulin, genetics } = state.input;
 
     const heightInMeters = Number(height) / 100;
@@ -106,7 +106,7 @@ export default function Result() {
                 </div>
             </div>
 
-            <div className="result-grid">
+            <div className="result-grid" style={{ gridTemplateColumns: '1fr' }}>
                 {/* Feature Impact Section (SHAP) */}
                 <div className="card">
                     <h3>🔍 How to reduce risk</h3>
@@ -123,36 +123,14 @@ export default function Result() {
                                 };
 
                                 return (
-                                    <div key={s.feature} className="shap-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                    <div key={s.feature} className="shap-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '6px' }}>
                                         <span style={{ fontWeight: 600, color: 'var(--text-dark)' }}>{featureLabels[s.feature] || s.feature}</span>
-                                        <span className={`risk-badge ${s.effect === 'Increase' ? 'risk-high' : 'risk-low'}`} style={{ fontSize: '0.65rem' }}>
+                                        <span className={`risk-badge ${s.effect === 'Increase' ? 'risk-high' : 'risk-low'}`} style={{ fontSize: '0.75rem' }}>
                                             {s.effect === 'Increase' ? '↑ Increases Risk' : '↓ Reduces Risk'}
                                         </span>
                                     </div>
                                 );
                             })}
-                    </div>
-                </div>
-
-                {/* Instance Explanation (LIME) */}
-                <div className="card">
-                    <h3>📊 Specific Indicators</h3>
-                    <div className="recommendations-list">
-                        {lime_explanation
-                            ?.filter(item => !item.feature.includes('DiabetesPedigreeFunction') && !item.feature.includes('SkinThickness'))
-                            ?.slice(0, 5)
-                            .map((item, idx) => (
-                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '6px' }}>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-dark)', fontWeight: 500 }}>{item.feature}</span>
-                                    <span style={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 'bold',
-                                        color: item.weight > 0 ? '#ef4444' : '#22c55e'
-                                    }}>
-                                        {item.weight > 0 ? '+' : ''}{(item.weight * 100).toFixed(1)}% Impact
-                                    </span>
-                                </div>
-                            ))}
                     </div>
                 </div>
             </div>
