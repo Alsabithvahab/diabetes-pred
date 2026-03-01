@@ -17,12 +17,12 @@ exports.register = async (req, res) => {
         user = new User({ fullName, email, password });
         await user.save();
 
-        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '7d' });
 
         res.status(201).json({
             success: true,
             token,
-            user: { id: user._id, email: user.email }
+            user: { id: user._id, email: user.email, isAdmin: user.isAdmin }
         });
     } catch (error) {
         console.error('Registration error:', error);
@@ -44,12 +44,12 @@ exports.login = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '7d' });
 
         res.status(200).json({
             success: true,
             token,
-            user: { id: user._id, email: user.email }
+            user: { id: user._id, email: user.email, isAdmin: user.isAdmin }
         });
     } catch (error) {
         console.error('Login error:', error);

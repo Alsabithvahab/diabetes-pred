@@ -22,35 +22,68 @@ else:
     model = None
 
 def get_recommendations(data):
-    recs = []
+    recs = {
+        "Diet": [],
+        "Exercise": [],
+        "Lifestyle": []
+    }
     age = data.get('Age', 0)
     bmi = data.get('BMI', 0)
     glucose = data.get('Glucose', 0)
     bp = data.get('BloodPressure', 0)
     genetics = data.get('Genetics', 0)
 
-    if bmi > 30:
-        recs.append("Focus on a calorie-controlled diet and aim for at least 150 minutes of moderate intensity exercise per week.")
-    elif bmi > 25:
-        recs.append("Incorporate light physical activity and monitor your portion sizes.")
+    # Diet Recommendations
     if glucose > 140:
-        recs.append("Reduce intake of refined sugars and simple carbohydrates.")
+        recs["Diet"].append(f"Your glucose ({glucose} mg/dL) is high. Prioritize low-glycemic foods like leafy greens, legumes, and whole grains.")
+        recs["Diet"].append("Strictly limit sugary beverages and refined white flour products.")
+    elif glucose > 100:
+        recs["Diet"].append("Monitor carbohydrate portions and choose complex carbs over simple sugars.")
+    
     if bp > 90:
-        recs.append("Monitor sodium intake and incorporate stress-reduction techniques.")
+        recs["Diet"].append("Incorporate the DASH diet (Dietary Approaches to Stop Hypertension), focusing on fruits, vegetables, and low-fat dairy.")
+        recs["Diet"].append("Limit sodium (salt) intake to less than 2,300 mg per day.")
+
+    # Exercise Recommendations
+    if bmi > 25:
+        recs["Exercise"].append(f"With a BMI of {bmi}, aim for 150-300 minutes of moderate-intensity aerobic activity per week.")
+        recs["Exercise"].append("Include strength training twice a week to improve metabolic rate.")
+    else:
+        recs["Exercise"].append("Keep up a regular routine of 30 minutes of daily physical activity.")
+
+    # Lifestyle & Medical
     if genetics == 1:
-        recs.append("Due to family history, schedule regular blood sugar screenings every 3 months.")
+        recs["Lifestyle"].append("High genetic risk detected. Ensure clinical screenings are done every 3-6 months.")
+    
+    if bp > 90:
+        recs["Lifestyle"].append("Practice stress-management techniques like yoga or deep breathing to help manage blood pressure.")
+    
     if age > 45:
-        recs.append("Over 45? Ensure regular cardiovascular checkups.")
-    if not recs:
-        recs.append("Maintain your current healthy lifestyle.")
-    return recs
+        recs["Lifestyle"].append("Regular cardiovascular health checks are vital above age 45.")
+
+    # Flatten categories for display
+    final_recs = []
+    for cat, items in recs.items():
+        for item in items:
+            final_recs.append(f"[{cat}] {item}")
+            
+    if not final_recs:
+        final_recs.append("[Lifestyle] You're doing great! Boost your metabolic health further by staying hydrated and ensuring 7-8 hours of quality sleep.")
+        final_recs.append("[Diet] Focus on a diverse range of colorful vegetables to maximize micronutrient intake.")
+        
+    return final_recs
 
 def get_counterfactuals(data):
     changes = {}
     if data.get('BMI', 0) > 30: changes['BMI'] = 24.9
     if data.get('Glucose', 0) > 140: changes['Glucose'] = 110
     if data.get('BloodPressure', 0) > 90: changes['BloodPressure'] = 80
-    if not changes: return "Healthy profile detected.", {}
+    if not changes:
+        if data.get('Glucose', 0) > 100:
+            return "Preventative Tip: Maintaining your Glucose below 100 mg/dL can further shield you from long-term risk.", {}
+        if data.get('BMI', 0) > 25:
+            return "Preventative Tip: Aiming for a BMI below 25 will significantly strengthen your metabolic resilience.", {}
+        return "Excellent! Your current metrics are in the ideal range. Focus on consistency to stay in this healthy zone.", {}
 
     cf_data = data.copy()
     for feat, val in changes.items(): cf_data[feat] = val
@@ -58,7 +91,7 @@ def get_counterfactuals(data):
     cf_scaled = scaler.transform(cf_df)
     cf_prob = model.predict_proba(cf_scaled)[0][1]
     new_risk = "Low" if cf_prob < 0.3 else "Medium" if cf_prob < 0.6 else "High"
-    msg = f"If {', '.join([f'{k} reduces to {v}' for k, v in changes.items()])}, risk drops to {new_risk}."
+    msg = f"Targeted Action: If you reduce {', '.join([f'{k} to {v}' for k, v in changes.items()])}, your risk category would drop to {new_risk}."
     return msg, changes
 
 @app.route('/predict', methods=['POST'])
@@ -68,7 +101,6 @@ def predict():
     
     # Extract full feature set
     input_data = {
-        'Pregnancies': data.get('pregnancies', 0),
         'Glucose': data.get('glucose', 0),
         'BloodPressure': data.get('bloodPressure', 0),
         'SkinThickness': data.get('skinThickness', 0),

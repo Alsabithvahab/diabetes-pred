@@ -45,9 +45,65 @@ const CookieBanner = () => {
 
 export default function Home() {
     const [form, setForm] = useState({
-        name: '', location: '', age: '', pregnancies: '0',
-        glucose: '', bloodPressure: '', insulin: '', genetics: 'No'
+        name: '', location: '', age: '',
+        glucose: '', bloodPressure: '', insulin: '', genetics: 'No',
+        height: '', weight: ''
     });
+    useEffect(() => {
+        const detectLocation = async () => {
+            // Try high-precision browser geolocation first
+            if (navigator.geolocation) {
+                console.log("Requesting high-accuracy GPS location...");
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        try {
+                            const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                            const data = await res.json();
+
+                            // Try to get the most specific location info possible
+                            const city = data.city || data.locality || data.localityInfo?.administrative?.find(a => a.adminLevel === 4)?.name || '';
+                            const state = data.principalSubdivision || data.region || '';
+                            const detailedLoc = city ? `${city}, ${state}` : state;
+
+                            setForm(prev => ({ ...prev, location: detailedLoc }));
+                            console.log("SUCCESS: Exact GPS Location detected:", detailedLoc);
+                        } catch (err) {
+                            console.error("Reverse geocoding failed:", err);
+                            setForm(prev => ({ ...prev, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
+                        }
+                    },
+                    async (error) => {
+                        if (error.code === 1) {
+                            console.warn("User DENIED location permission. Falling back to IP.");
+                            alert("To get your EXACT location for the assessment, please allow location access in your browser settings.");
+                        } else {
+                            console.warn("Geolocation failed (timeout/unavailable). Code:", error.code, "Message:", error.message);
+                        }
+
+                        // Fallback to IP-based detection
+                        try {
+                            console.log("Attempting IP-based location fallback...");
+                            const res = await fetch('https://ipapi.co/json/');
+                            const data = await res.json();
+                            if (data.region) {
+                                const fallbackLoc = data.city ? `${data.city}, ${data.region}` : data.region;
+                                setForm(prev => ({ ...prev, location: fallbackLoc }));
+                                console.log("IP Fallback Location detected (less accurate):", fallbackLoc);
+                            }
+                        } catch (ipErr) {
+                            console.error("IP detection fallback failed:", ipErr);
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                console.error("Geolocation is NOT supported by this browser.");
+            }
+        };
+        detectLocation();
+    }, []);
+
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -56,16 +112,18 @@ export default function Home() {
     const onSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        const heightInMeters = Number(form.height) / 100;
+        const calculatedBmi = Number(form.weight) / (heightInMeters * heightInMeters);
+
         try {
             const res = await submitPrediction({
                 ...form,
                 age: Number(form.age),
-                pregnancies: Number(form.pregnancies),
                 glucose: Number(form.glucose),
                 bloodPressure: Number(form.bloodPressure),
                 insulin: Number(form.insulin),
                 skinThickness: 0,
-                bmi: 25.0,
+                bmi: Number(calculatedBmi.toFixed(1)),
                 diabetesPedigreeFunction: 0.47
             });
             navigate('/result', { state: { result: res.data.data, input: form } });
@@ -92,23 +150,6 @@ export default function Home() {
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">📍 Location</label>
-                            <select name="location" onChange={handle} required>
-                                <option value="">Select location</option>
-                                <option value="New York">New York</option>
-                                <option value="London">London</option>
-                                <option value="Mumbai">Mumbai</option>
-                                <option value="Tokyo">Tokyo</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">🤰 Pregnancies</label>
-                            <input name="pregnancies" type="number" placeholder="0-17" min="0" onChange={handle} required />
-                        </div>
-
-                        <div className="form-group">
                             <label className="form-label">🩸 Glucose (mg/dL)</label>
                             <input name="glucose" type="number" placeholder="70-200" onChange={handle} required />
                         </div>
@@ -116,6 +157,16 @@ export default function Home() {
                         <div className="form-group">
                             <label className="form-label">❤️ Blood Pressure (mmHg)</label>
                             <input name="bloodPressure" type="number" placeholder="60-120" onChange={handle} required />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">📏 Height (cm)</label>
+                            <input name="height" type="number" placeholder="e.g. 170" onChange={handle} required />
+                        </div>
+
+                        <div className="form-group">
+                            <label className="form-label">⚖️ Weight (kg)</label>
+                            <input name="weight" type="number" placeholder="e.g. 70" onChange={handle} required />
                         </div>
 
 
@@ -127,7 +178,7 @@ export default function Home() {
 
                         <div className="form-group">
                             <label className="form-label">📅 Age</label>
-                            <input name="age" type="number" placeholder="21-81" onChange={handle} required />
+                            <input name="age" type="number" placeholder="Enter your age" onChange={handle} required />
                         </div>
 
                         <div className="form-group" style={{ gridColumn: 'span 2', marginTop: '1rem', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

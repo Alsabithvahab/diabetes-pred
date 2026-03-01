@@ -1,0 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --text-main: #1f2937;
+    --text-secondary: #6b7280;
+    --bg-light: #f9fafb;
+    --border-light: #e5e7eb;
+    --radius-lg: 12px;
+    --white: #ffffff;
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --radius: 12px;
+    --high: #dc3545;
+    /* Normal Red */
+    --low: #22c55e;
+    --medium: #f59e0b;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.navbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: scale(1.02);
+}
+
+.btn-danger {
+    background: #dc3545;
+    /* Normal Red */
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: scale(1.02);
+}
+
+.risk-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.risk-low {
+    color: var(--low);
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.risk-medium {
+    color: var(--medium);
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+}
+
+.risk-high {
+    color: var(--high);
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+/* Auth Styles */
+.auth-page-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.auth-card {
+    background: white;
+    padding: 3rem 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 480px;
+}
+
+.auth-title {
+    text-align: center;
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2.5rem;
+}
+
+.auth-title .highlight {
+    color: var(--primary);
+}
+
+.auth-title .faded {
+    color: #4b5563;
+}
+
+.form-field {
+    margin-bottom: 1.5rem;
+}
+
+.form-field label {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.75rem;
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.styled-input {
+    width: 100%;
+    padding: 0.875rem 3.5rem 0.875rem 1rem;
+    /* Increased right padding for icon */
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    font-size: 1.125rem;
+    transition: all 0.2s;
+    color: var(--text-main);
+    background: white;
+    outline: none;
+    box-sizing: border-box;
+    /* Crucial for padding/width */
+}
+
+.styled-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.toggle-icon {
+    position: absolute;
+    right: 1.25rem;
+    cursor: pointer;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    user-select: none;
+    z-index: 10;
+}
+
+.login-submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 1.5rem;
+}
+
+.login-submit-btn:hover {
+    background: var(--primary-hover);
+}
+
+.login-submit-btn:active {
+    transform: scale(0.98);
+}
+
+.error-msg {
+    color: #ef4444;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    background: #fef2f2;
+    border-radius: 8px;
+    font-weight: 500;
+}

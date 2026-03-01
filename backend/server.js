@@ -14,7 +14,7 @@ app.use((req, res, next) => {
     next();
 });
 app.use('/api/auth', authRoutes);
-app.use('/api', predictionRoutes);
+app.use('/api/predictions', predictionRoutes);
 
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/diabetes_db_new';

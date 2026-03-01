@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key_123';
 
 const auth = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const token = req.header('x-auth-token') || req.header('Authorization')?.replace('Bearer ', '');
 
         if (!token) {
             return res.status(401).json({ success: false, message: 'No token, authorization denied' });

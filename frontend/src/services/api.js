@@ -16,6 +16,6 @@ axios.interceptors.request.use(
 
 export const login = (credentials) => axios.post(`${API_BASE}/auth/login`, credentials);
 export const signup = (userData) => axios.post(`${API_BASE}/auth/register`, userData);
-export const submitPrediction = (data) => axios.post(`${API_BASE}/predict`, data);
-export const getHistory = () => axios.get(`${API_BASE}/history`);
-export const getAnalytics = () => axios.get(`${API_BASE}/analytics`);
+export const submitPrediction = (data) => axios.post(`${API_BASE}/predictions/predict`, data);
+export const getHistory = () => axios.get(`${API_BASE}/predictions/history`);
+export const getAnalytics = () => axios.get(`${API_BASE}/predictions/analytics`);

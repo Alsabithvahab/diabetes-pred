@@ -24,7 +24,6 @@ export default function Navbar() {
                 <NavLink to="/" style={({ isActive }) => ({ color: isActive ? 'var(--primary)' : 'inherit', textDecoration: 'none' })}>Home</NavLink>
                 {isAuthenticated ? (
                     <>
-                        <NavLink to="/dashboard" style={({ isActive }) => ({ color: isActive ? 'var(--primary)' : 'inherit', textDecoration: 'none' })}>Dashboard</NavLink>
                         <button onClick={handleLogout} className="btn btn-danger" style={{ padding: '0.5rem 1.2rem', fontSize: '0.9rem' }}>Logout</button>
                     </>
                 ) : (

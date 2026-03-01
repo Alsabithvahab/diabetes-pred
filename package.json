@@ -5,9 +5,10 @@
   "scripts": {
     "install-all": "npm install --prefix frontend && npm install --prefix backend",
     "start-frontend": "npm start --prefix frontend",
+    "start-admin": "npm start --prefix admin-panel",
     "start-backend": "node backend/server.js",
     "start-ml": "python ml-service/app.py",
-    "dev": "npx concurrently \"npm run start-ml\" \"npm run start-backend\" \"npm run start-frontend\""
+    "dev": "npx concurrently \"npm run start-ml\" \"npm run start-backend\" \"npm run start-frontend\" \"npm run start-admin\""
   },
   "dependencies": {
     "concurrently": "^8.2.2"

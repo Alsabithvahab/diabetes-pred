@@ -28,8 +28,8 @@ def train_model():
 
     df['Genetics'] = (df['DiabetesPedigreeFunction'] > 0.47).astype(int)
     
-    # Feature selection: Full PIMA set + Genetics
-    features = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Genetics']
+    # Feature selection: Reduced set (Pregnancies removed)
+    features = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Genetics']
     X = df[features]
     y = df['Outcome']
 

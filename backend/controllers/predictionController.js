@@ -20,7 +20,7 @@ exports.getPrediction = async (req, res) => {
     try {
         console.log("Received prediction request:", req.body);
         let {
-            name, location, age, pregnancies, glucose,
+            name, location, age, glucose,
             bloodPressure, skinThickness, insulin, bmi,
             diabetesPedigreeFunction, genetics
         } = req.body;
@@ -33,7 +33,7 @@ exports.getPrediction = async (req, res) => {
         const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
         console.log(`Calling ML service at ${mlServiceUrl}/predict`);
         const mlResponse = await axios.post(`${mlServiceUrl}/predict`, {
-            pregnancies, glucose, bloodPressure, skinThickness,
+            glucose, bloodPressure, skinThickness,
             insulin, bmi, diabetesPedigreeFunction, age, genetics
         });
 
@@ -60,6 +60,7 @@ exports.getPrediction = async (req, res) => {
             console.log("Saved to local JSON");
         }
 
+        console.log("Prediction success. Returning result.");
         res.status(200).json({
             success: true,
             data: {
@@ -115,7 +116,62 @@ exports.getAnalytics = async (req, res) => {
         }
         res.status(200).json({ success: true, data: analytics });
     } catch (error) {
-        console.error("Analytics Error:", error);
+        console.error("Analytics Error DETAILS:", error);
+        res.status(500).json({ success: false, message: "Analytics error: " + error.message });
+    }
+};
+
+exports.getAllPredictions = async (req, res) => {
+    try {
+        let history;
+        if (global.dbConnected) {
+            history = await Prediction.find().populate('userId', 'fullName email').sort({ date: -1 });
+        } else {
+            history = readLocal().sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+        res.status(200).json({ success: true, data: history });
+    } catch (error) {
+        console.error("All Predictions Error:", error);
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+exports.deletePrediction = async (req, res) => {
+    try {
+        console.log("--- DELETE REQUEST START ---");
+        console.log("ID Parameter:", req.params.id);
+
+        if (global.dbConnected) {
+            console.log("Database: MongoDB Mode");
+            if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+                console.warn("!!! Invalid ID format:", req.params.id);
+                return res.status(400).json({ success: false, message: 'Invalid ID format' });
+            }
+
+            console.log("Executing Prediction.findByIdAndDelete...");
+            const deleted = await Prediction.findByIdAndDelete(req.params.id);
+            console.log("Result of deletion:", deleted ? "Found and Deleted" : "Not Found in DB");
+
+            return res.status(200).json({ success: true, message: 'Prediction deleted successfully' });
+        } else {
+            console.log("Database: Local JSON Mode");
+            const history = readLocal();
+            const originalLength = history.length;
+            const updatedHistory = history.filter(p => p._id !== req.params.id);
+
+            if (updatedHistory.length === originalLength) {
+                console.warn("!!! Record not found in JSON file");
+                return res.status(404).json({ success: false, message: 'Record not found' });
+            }
+
+            fs.writeFileSync(DATA_FILE, JSON.stringify(updatedHistory, null, 2));
+            console.log("Successfully updated JSON file");
+            return res.status(200).json({ success: true, message: 'Prediction deleted successfully' });
+        }
+    } catch (error) {
+        console.error("!!! CRITICAL DELETE ERROR:", error);
+        return res.status(500).json({ success: false, message: error.message });
+    } finally {
+        console.log("--- DELETE REQUEST END ---");
     }
 };

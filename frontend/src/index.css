@@ -342,6 +342,94 @@ body {
     line-height: 1.6;
 }
 
+/* Result Page Enhancements */
+.result-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metrics-summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.metric-item {
+    background: var(--primary-light);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.metric-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.risk-meter-container {
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.risk-meter {
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    position: relative;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.risk-meter-bar {
+    height: 100%;
+    transition: width 1s ease-out;
+}
+
+.risk-meter-bar.low {
+    background: var(--low);
+}
+
+.risk-meter-bar.medium {
+    background: var(--medium);
+}
+
+.risk-meter-bar.high {
+    background: var(--high);
+}
+
+.shap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.shap-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+}
+
 .dashboard-footer {
     text-align: center;
     margin-top: 2rem;
@@ -430,9 +518,43 @@ body {
     border: none;
     font-size: 0.8125rem;
     cursor: pointer;
-    transition: color 0.2s;
+    background: #f8fafc;
+    border: 1px solid var(--border);
 }
 
-.cookie-btn-manage:hover {
-    color: #f8fafc;
+.recommendations-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommendation-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fdfdfd;
+    border-left: 4px solid var(--primary);
+    margin-bottom: 0.75rem;
+    border-radius: 0 8px 8px 0;
+}
+
+.recommendation-icon {
+    font-size: 1.25rem;
+}
+
+.what-if-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    border: none;
+}
+
+.what-if-card h3 {
+    color: var(--primary-light);
+}
+
+.what-if-card p {
+    color: #cbd5e1;
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.6;
 }
