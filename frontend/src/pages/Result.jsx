@@ -109,10 +109,7 @@ export default function Result() {
             <div className="result-grid">
                 {/* Feature Impact Section (SHAP) */}
                 <div className="card">
-                    <h3>🔍 Why did I get this result?</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                        The model analyzed your indicators. Here's how each factor contributed to your risk assessment.
-                    </p>
+                    <h3>🔍 How to reduce risk</h3>
                     <div className="shap-list">
                         {shap_values
                             .filter(s => s.feature !== 'SkinThickness' && s.feature !== 'DiabetesPedigreeFunction' && s.feature !== 'Insulin')
@@ -140,9 +137,6 @@ export default function Result() {
                 {/* Instance Explanation (LIME) */}
                 <div className="card">
                     <h3>📊 Specific Indicators</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                        The most significant factors in <strong>your</strong> prediction and their relative impact.
-                    </p>
                     <div className="recommendations-list">
                         {lime_explanation
                             ?.filter(item => !item.feature.includes('DiabetesPedigreeFunction') && !item.feature.includes('SkinThickness'))
@@ -166,8 +160,7 @@ export default function Result() {
             <div className="result-grid">
                 {/* Counterfactuals Section */}
                 <div className="card what-if-card">
-                    <h3>🧪 How to Reduce Your Risk</h3>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>Targeted improvements to lower your risk level:</p>
+                    <h3>🧪 Targeted Improvements</h3>
                     <p style={{ fontStyle: 'italic', color: 'var(--primary)', fontWeight: 600, fontSize: '1rem' }}>"{counterfactual}"</p>
                 </div>
 
