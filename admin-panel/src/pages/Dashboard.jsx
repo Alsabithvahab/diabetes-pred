@@ -212,15 +212,17 @@ export default function Dashboard() {
 
             {/* Detailed Assessments Table Section */}
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div className="dashboard-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <h3 style={{ margin: 0 }}>Patient Oversight & Records</h3>
-                    <input
-                        type="text"
-                        placeholder="Search patient or location..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1px solid var(--border)', width: '300px' }}
-                    />
+                    <div className="search-container" style={{ width: '100%', maxWidth: '300px' }}>
+                        <input
+                            type="text"
+                            placeholder="Search patient or location..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1px solid var(--border)', width: '100%' }}
+                        />
+                    </div>
                 </div>
 
 

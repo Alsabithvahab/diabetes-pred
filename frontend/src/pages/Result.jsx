@@ -12,7 +12,7 @@ export default function Result() {
     if (!state?.result || !state?.input) return null;
 
     const { probability, risk_level, shap_values, counterfactual, recommendations } = state.result;
-    const { name, age, location, height, weight, glucose, bloodPressure, insulin, genetics } = state.input;
+    const { name, age, location, height, weight, glucose, bloodPressure, insulin, genetics, skinThickness, diabetesPedigreeFunction } = state.input;
 
     const heightInMeters = Number(height) / 100;
     const bmi = (Number(weight) / (heightInMeters * heightInMeters)).toFixed(1);
@@ -109,28 +109,98 @@ export default function Result() {
             <div className="result-grid" style={{ gridTemplateColumns: '1fr' }}>
                 {/* Feature Impact Section (SHAP) */}
                 <div className="card">
-                    <h3>🔍 How to reduce risk</h3>
+                    <h3>🔍 Risk factors analysis</h3>
                     <div className="shap-list">
-                        {shap_values
-                            .filter(s => s.feature !== 'SkinThickness' && s.feature !== 'DiabetesPedigreeFunction' && s.feature !== 'Insulin')
-                            .map(s => {
-                                const featureLabels = {
-                                    'Glucose': 'Blood Glucose',
-                                    'BloodPressure': 'Blood Pressure',
-                                    'BMI': 'Body Mass Index (BMI)',
-                                    'Age': 'Age',
-                                    'Genetics': 'Family History'
+                        {(() => {
+                            // Map of all possible features to their display labels and input values
+                            const featureLabels = {
+                                'Glucose': 'Blood Glucose',
+                                'BloodPressure': 'Blood Pressure',
+                                'BMI': 'Body Mass Index (BMI)',
+                                'Age': 'Age',
+                                'Genetics': 'Family History',
+                                'Insulin': 'Insulin Level',
+                                'SkinThickness': 'Skin Thickness',
+                                'DiabetesPedigreeFunction': 'Genetic Pedigree'
+                            };
+
+                            const featureValues = {
+                                'Glucose': `${glucose} mg/dL`,
+                                'BloodPressure': `${bloodPressure} mmHg`,
+                                'BMI': `${bmi} kg/m²`,
+                                'Age': `${age} Years`,
+                                'Genetics': genetics === 'Yes' ? 'Present' : 'None',
+                                'Insulin': `${insulin || 0} mu U/ml`,
+                                'SkinThickness': `${state.input.skinThickness || 0} mm`,
+                                'DiabetesPedigreeFunction': (state.input.diabetesPedigreeFunction || 0.47).toFixed(3)
+                            };
+
+                            // Filter and sort SHAP values by their absolute impact
+                            const filteredShap = shap_values.filter(s => !['SkinThickness', 'DiabetesPedigreeFunction'].includes(s.feature));
+                            const sortedShap = [...filteredShap].sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+                            const totalImpact = sortedShap.reduce((acc, s) => acc + Math.abs(s.value), 0);
+
+                            return sortedShap.map(s => {
+                                const percentage = totalImpact > 0 ? ((Math.abs(s.value) / totalImpact) * 100).toFixed(0) : 0;
+                                const explanations = {
+                                    'Glucose': s.effect === 'Increase'
+                                        ? `Your glucose of ${glucose} mg/dL according to your health assessment is higher than the ideal range. Why? Elevated blood sugar levels mean your body is struggling to process glucose, which is a key driver of insulin resistance and long-term diabetes risk.`
+                                        : `Your glucose level of ${glucose} mg/dL is within a healthy range. Why? This suggests efficient insulin function and consistent blood sugar management, significantly lowering your overall risk profile.`,
+                                    'BloodPressure': s.effect === 'Increase'
+                                        ? `A blood pressure of ${bloodPressure} mmHg puts extra strain on your cardiovascular system. Why? Hypertension is strongly linked to metabolic syndrome, which impairs the body's ability to regulate insulin and glucose.`
+                                        : `Maintaining your blood pressure at ${bloodPressure} mmHg is excellent for metabolic health. Why? Lower pressure reduces systemic inflammation and supports better pancreatic and vascular function.`,
+                                    'BMI': s.effect === 'Increase'
+                                        ? `With a BMI of ${bmi} kg/m², your body carries extra adipose tissue. Why? This fat can produce inflammatory markers that block insulin from working correctly at the cellular level, increasing diabetes susceptibility.`
+                                        : `Your BMI of ${bmi} kg/m² is in a favorable range. Why? Lower body fat percentages are associated with higher insulin sensitivity, meaning your cells can respond more effectively to the insulin your body produces.`,
+                                    'Age': s.effect === 'Increase'
+                                        ? `At ${age} years old, your metabolic risk is naturally higher. Why? As we age, the body's natural ability to regulate glucose can decline, and muscle mass (which helps burn glucose) may decrease if not active.`
+                                        : `Being ${age} years old is a protective factor. Why? Younger individuals typically have a more resilient metabolism and higher pancreatic capacity to handle glucose loads, reducing baseline risk.`,
+                                    'Genetics': genetics === 'Yes'
+                                        ? `Having a reported family history of diabetes means you have a genetic predisposition. Why? Inherited genetic markers lower your threshold for other risk factors like diet or sedentary behavior, making you more susceptible.`
+                                        : `Having no significant family history is a strong metabolic advantage. Why? It suggests you don't have the inherited genetic markers that typically make a person more susceptible to type 2 diabetes.`,
+                                    'Insulin': s.effect === 'Increase'
+                                        ? `Your insulin level of ${featureValues['Insulin']} suggests hyperinsulinemia. Why? This often occurs when cells become resistant to insulin, forcing the pancreas to overproduce it to keep blood sugar stable.`
+                                        : `An insulin level of ${featureValues['Insulin']} indicates good pancreatic efficiency. Why? It shows your body can manage glucose without overworking the pancreas, a sign of high insulin sensitivity.`,
+                                    'SkinThickness': s.effect === 'Increase'
+                                        ? `Increased skin fold thickness (${featureValues['SkinThickness']}) can correlate with subcutaneous fat distribution. Why? Excess fat in these areas is often associated with metabolic dysfunction and systemic insulin resistance.`
+                                        : `Lower skin fold thickness (${featureValues['SkinThickness']}) is generally favorable. Why? It suggests lower overall body fat and a healthier metabolic profile, reducing the risk of inflammation-driven diabetes.`,
+                                    'DiabetesPedigreeFunction': s.effect === 'Increase'
+                                        ? `A Genetic Pedigree score of ${featureValues['DiabetesPedigreeFunction']} is relatively high. Why? This complex metric accounts for family history patterns; higher scores indicate a stronger hereditary probability for diabetes development.`
+                                        : `A low Pedigree score of ${featureValues['DiabetesPedigreeFunction']} is protective. Why? It indicates a lower mathematical probability of inherited diabetic traits based on family lineage data.`
                                 };
 
                                 return (
-                                    <div key={s.feature} className="shap-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', padding: '0.5rem', background: '#f8fafc', borderRadius: '6px' }}>
-                                        <span style={{ fontWeight: 600, color: 'var(--text-dark)' }}>{featureLabels[s.feature] || s.feature}</span>
-                                        <span className={`risk-badge ${s.effect === 'Increase' ? 'risk-high' : 'risk-low'}`} style={{ fontSize: '0.75rem' }}>
-                                            {s.effect === 'Increase' ? '↑ Increases Risk' : '↓ Reduces Risk'}
-                                        </span>
+                                    <div key={s.feature} className="shap-item" style={{ marginBottom: '1.25rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0', transition: 'transform 0.2s ease' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                                            <div style={{ flex: 1 }}>
+                                                <span style={{ fontWeight: 800, color: 'var(--text-dark)', fontSize: '1.1rem', display: 'block' }}>{featureLabels[s.feature] || s.feature}</span>
+                                                <span style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: 600 }}>Value: {featureValues[s.feature]}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <span className={`risk-badge ${s.effect === 'Increase' ? 'risk-low' : 'risk-high'}`} style={{ fontSize: '0.65rem', padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                    {s.effect === 'Increase' ? '↑ Increase' : '↓ Decrease'}
+                                                </span>
+                                                <span style={{
+                                                    fontSize: '1.25rem',
+                                                    fontWeight: 900,
+                                                    color: s.effect === 'Increase' ? '#22c55e' : '#ef4444',
+                                                    minWidth: '50px',
+                                                    textAlign: 'right'
+                                                }}>
+                                                    {percentage}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div style={{ borderTop: '1px solid #edf2f7', paddingTop: '0.75rem' }}>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>Medical Reason</span>
+                                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                                                {explanations[s.feature] || "Detailed evaluation of this metric contributes to your overall metabolic risk calculation."}
+                                            </p>
+                                        </div>
                                     </div>
                                 );
-                            })}
+                            });
+                        })()}
                     </div>
                 </div>
             </div>

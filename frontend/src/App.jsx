@@ -6,6 +6,7 @@ import Result from './pages/Result.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
+import About from './pages/About.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import './index.css';
@@ -19,6 +20,7 @@ export default function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<About />} />
                     <Route path="/result" element={<PrivateRoute><Result /></PrivateRoute>} />
                     <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 </Routes>

@@ -181,11 +181,15 @@ export default function Home() {
                             <input name="age" type="number" placeholder="Enter your age" onChange={handle} required />
                         </div>
 
-                        <div className="form-group" style={{ gridColumn: 'span 2', marginTop: '1rem', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div className="form-group family-history-group" style={{ marginTop: '1rem' }}>
                             <label className="form-label">🧬 Family history of diabetes?</label>
-                            <div style={{ display: 'flex', gap: '1.5rem' }}>
-                                <label style={{ cursor: 'pointer' }}><input type="radio" name="genetics" value="Yes" onChange={handle} /> Yes</label>
-                                <label style={{ cursor: 'pointer' }}><input type="radio" name="genetics" value="No" defaultChecked onChange={handle} /> No</label>
+                            <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
+                                <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <input type="radio" name="genetics" value="Yes" onChange={handle} /> Yes
+                                </label>
+                                <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <input type="radio" name="genetics" value="No" defaultChecked onChange={handle} /> No
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -225,6 +229,6 @@ export default function Home() {
             </section>
 
             <CookieBanner />
-        </div>
+        </div >
     );
 }

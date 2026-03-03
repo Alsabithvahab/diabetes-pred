@@ -25,11 +25,11 @@ def get_recommendations(data):
         "Exercise": [],
         "Lifestyle": []
     }
-    age = data.get('Age', 0)
-    bmi = data.get('BMI', 0)
-    glucose = data.get('Glucose', 0)
-    bp = data.get('BloodPressure', 0)
-    genetics = data.get('Genetics', 0)
+    age = data.get('Age') or 0
+    bmi = data.get('BMI') or 0
+    glucose = data.get('Glucose') or 0
+    bp = data.get('BloodPressure') or 0
+    genetics = data.get('Genetics') or 0
 
     # Diet Recommendations
     if glucose > 140:
@@ -83,13 +83,17 @@ def get_recommendations(data):
 
 def get_counterfactuals(data):
     changes = {}
-    if data.get('BMI', 0) > 30: changes['BMI'] = 24.9
-    if data.get('Glucose', 0) > 140: changes['Glucose'] = 110
-    if data.get('BloodPressure', 0) > 90: changes['BloodPressure'] = 80
+    bmi = data.get('BMI') or 0
+    glucose = data.get('Glucose') or 0
+    bp = data.get('BloodPressure') or 0
+    
+    if bmi > 30: changes['BMI'] = 24.9
+    if glucose > 140: changes['Glucose'] = 110
+    if bp > 90: changes['BloodPressure'] = 80
     if not changes:
-        if data.get('Glucose', 0) > 100:
+        if (data.get('Glucose') or 0) > 100:
             return "Preventative Tip: Maintaining your Glucose below 100 mg/dL can further shield you from long-term risk.", {}
-        if data.get('BMI', 0) > 25:
+        if (data.get('BMI') or 0) > 25:
             return "Preventative Tip: Aiming for a BMI below 25 will significantly strengthen your metabolic resilience.", {}
         return "Excellent! Your current metrics are in the ideal range. Focus on consistency to stay in this healthy zone.", {}
 
@@ -109,13 +113,13 @@ def predict():
     
     # Extract full feature set
     input_data = {
-        'Glucose': data.get('glucose', 0),
-        'BloodPressure': data.get('bloodPressure', 0),
-        'SkinThickness': data.get('skinThickness', 0),
-        'Insulin': data.get('insulin', 0),
-        'BMI': data.get('bmi', 0),
-        'DiabetesPedigreeFunction': data.get('diabetesPedigreeFunction', 0.5),
-        'Age': data.get('age', 0),
+        'Glucose': data.get('glucose') or 0,
+        'BloodPressure': data.get('bloodPressure') or 0,
+        'SkinThickness': data.get('skinThickness') or 0,
+        'Insulin': data.get('insulin') or 0,
+        'BMI': data.get('bmi') or 0,
+        'DiabetesPedigreeFunction': data.get('diabetesPedigreeFunction') or 0.5,
+        'Age': data.get('age') or 0,
         'Genetics': 1 if data.get('genetics') == 'Yes' else 0
     }
     

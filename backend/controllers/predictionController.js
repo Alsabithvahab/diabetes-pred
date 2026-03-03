@@ -26,9 +26,9 @@ exports.getPrediction = async (req, res) => {
         } = req.body;
 
         // Apply defaults if missing (for cases where they are removed from UI)
-        if (skinThickness === undefined) skinThickness = 0;
-        if (bmi === undefined) bmi = 25.0;
-        if (diabetesPedigreeFunction === undefined) diabetesPedigreeFunction = 0.47;
+        if (skinThickness === undefined || skinThickness === null) skinThickness = 0;
+        if (bmi === undefined || bmi === null) bmi = 25.0;
+        if (diabetesPedigreeFunction === undefined || diabetesPedigreeFunction === null) diabetesPedigreeFunction = 0.47;
 
         const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
         console.log(`Calling ML service at ${mlServiceUrl}/predict`);
