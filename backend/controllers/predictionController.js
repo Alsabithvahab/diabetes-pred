@@ -30,7 +30,7 @@ exports.getPrediction = async (req, res) => {
         if (bmi === undefined || bmi === null) bmi = 25.0;
         if (diabetesPedigreeFunction === undefined || diabetesPedigreeFunction === null) diabetesPedigreeFunction = 0.47;
 
-        let mlServiceUrl = (process.env.ML_SERVICE_URL || 'https://diabetes-pred-rppa.onrender.com').trim();
+        let mlServiceUrl = 'https://diabetes-pred-rppa.onrender.com';
         // Normalize URL: ensure protocol and remove trailing slash
         if (!mlServiceUrl.startsWith('http')) {
             mlServiceUrl = `http://${mlServiceUrl}`;
