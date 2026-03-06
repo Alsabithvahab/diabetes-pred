@@ -12,6 +12,7 @@ app.use(cors({
         const allowedOrigins = [
             'https://diabetes-admin-panel.web.app',
             'https://diabetes-pred-f3d59.web.app',
+            'https://diabetes-admin-f3d59.web.app',
             'http://localhost:3000'
         ];
         if (!origin || allowedOrigins.includes(origin)) {
