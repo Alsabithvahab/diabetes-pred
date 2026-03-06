@@ -4,7 +4,7 @@ const { getPrediction, getHistory, getAnalytics, getAllPredictions, deletePredic
 const auth = require('../middleware/authMiddleware');
 const admin = require('../middleware/adminMiddleware');
 
-router.post('/predict', auth, getPrediction);
+router.post('/predict', getPrediction);
 router.get('/history', auth, getHistory);
 router.get('/analytics', auth, getAnalytics);
 router.get('/all', auth, admin, getAllPredictions);

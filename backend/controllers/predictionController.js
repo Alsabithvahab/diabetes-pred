@@ -30,7 +30,10 @@ exports.getPrediction = async (req, res) => {
         if (bmi === undefined || bmi === null) bmi = 25.0;
         if (diabetesPedigreeFunction === undefined || diabetesPedigreeFunction === null) diabetesPedigreeFunction = 0.47;
 
-        const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
+        let mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
+        if (!mlServiceUrl.startsWith('http')) {
+            mlServiceUrl = `http://${mlServiceUrl}`;
+        }
         console.log(`Calling ML service at ${mlServiceUrl}/predict`);
         const mlResponse = await axios.post(`${mlServiceUrl}/predict`, {
             glucose, bloodPressure, skinThickness,
@@ -43,7 +46,7 @@ exports.getPrediction = async (req, res) => {
         const result = {
             name, age, glucose, bloodPressure, bmi, genetics, location,
             probability, riskLevel: risk_level, shapSummary: shap_values,
-            userId: req.user.id,
+            userId: req.user ? req.user.id : null,
             date: new Date()
         };
 

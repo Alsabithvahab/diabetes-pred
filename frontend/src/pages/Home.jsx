@@ -107,7 +107,10 @@ export default function Home() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
-    const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handle = (e) => {
+        const { name, value } = e.target;
+        setForm(prev => ({ ...prev, [name]: value }));
+    };
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -146,49 +149,49 @@ export default function Home() {
                     <div className="form-grid">
                         <div className="form-group">
                             <label className="form-label">👤 Full Name</label>
-                            <input name="name" placeholder="Enter your name" onChange={handle} required />
+                            <input name="name" value={form.name} placeholder="Enter your name" onChange={handle} required />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">🩸 Glucose (mg/dL)</label>
-                            <input name="glucose" type="number" placeholder="70-200" onChange={handle} required />
+                            <input name="glucose" type="number" value={form.glucose} placeholder="70-200" onChange={handle} required />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">❤️ Blood Pressure (mmHg)</label>
-                            <input name="bloodPressure" type="number" placeholder="60-120" onChange={handle} required />
+                            <input name="bloodPressure" type="number" value={form.bloodPressure} placeholder="60-120" onChange={handle} required />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">📏 Height (cm)</label>
-                            <input name="height" type="number" placeholder="e.g. 170" onChange={handle} required />
+                            <input name="height" type="number" value={form.height} placeholder="e.g. 170" onChange={handle} required />
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">⚖️ Weight (kg)</label>
-                            <input name="weight" type="number" placeholder="e.g. 70" onChange={handle} required />
+                            <input name="weight" type="number" value={form.weight} placeholder="e.g. 70" onChange={handle} required />
                         </div>
 
 
                         <div className="form-group">
                             <label className="form-label">💉 Insulin (mu U/ml)</label>
-                            <input name="insulin" type="number" placeholder="0-846" onChange={handle} required />
+                            <input name="insulin" type="number" value={form.insulin} placeholder="0-846" onChange={handle} required />
                         </div>
 
 
                         <div className="form-group">
                             <label className="form-label">📅 Age</label>
-                            <input name="age" type="number" placeholder="Enter your age" onChange={handle} required />
+                            <input name="age" type="number" value={form.age} placeholder="Enter your age" onChange={handle} required />
                         </div>
 
                         <div className="form-group family-history-group" style={{ marginTop: '1rem' }}>
                             <label className="form-label">🧬 Family history of diabetes?</label>
                             <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.5rem' }}>
                                 <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <input type="radio" name="genetics" value="Yes" onChange={handle} /> Yes
+                                    <input type="radio" name="genetics" value="Yes" checked={form.genetics === 'Yes'} onChange={handle} /> Yes
                                 </label>
                                 <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <input type="radio" name="genetics" value="No" defaultChecked onChange={handle} /> No
+                                    <input type="radio" name="genetics" value="No" checked={form.genetics === 'No'} onChange={handle} /> No
                                 </label>
                             </div>
                         </div>

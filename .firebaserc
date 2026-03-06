@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "diabetes-pred-f3d59"
-  }
+  },
+  "targets": {
+    "diabetes-pred-f3d59": {
+      "hosting": {
+        "app": [
+          "diabetes-pred-f3d59"
+        ],
+        "admin": [
+          "diabetes-admin-f3d59"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
