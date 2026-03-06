@@ -29,6 +29,15 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/predictions', predictionRoutes);
 
+// Health check
+app.get('/health', (req, res) => res.json({ status: 'ok', db: global.dbConnected }));
+
+// Catch-all 404 handler for debugging
+app.use((req, res) => {
+    console.log(`404 Not Found: ${req.method} ${req.url}`);
+    res.status(404).json({ success: false, message: `Route ${req.method} ${req.url} not found on this server` });
+});
+
 const PORT = process.env.PORT || 5001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/diabetes_db_new';
 
