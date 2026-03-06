@@ -30,15 +30,20 @@ exports.getPrediction = async (req, res) => {
         if (bmi === undefined || bmi === null) bmi = 25.0;
         if (diabetesPedigreeFunction === undefined || diabetesPedigreeFunction === null) diabetesPedigreeFunction = 0.47;
 
-        let mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
+        let mlServiceUrl = (process.env.ML_SERVICE_URL || 'http://localhost:5000').trim();
+        // Normalize URL: ensure protocol and remove trailing slash
         if (!mlServiceUrl.startsWith('http')) {
             mlServiceUrl = `http://${mlServiceUrl}`;
         }
-        console.log(`Calling ML service at ${mlServiceUrl}/predict`);
-        const mlResponse = await axios.post(`${mlServiceUrl}/predict`, {
+        mlServiceUrl = mlServiceUrl.replace(/\/+$/, '');
+
+        const targetUrl = `${mlServiceUrl}/predict`;
+        console.log(`>>> CALLING ML SERVICE: ${targetUrl}`);
+
+        const mlResponse = await axios.post(targetUrl, {
             glucose, bloodPressure, skinThickness,
             insulin, bmi, diabetesPedigreeFunction, age, genetics
-        });
+        }, { timeout: 15000 });
 
         console.log("ML service response received");
         const { probability, risk_level, shap_values, lime_explanation, counterfactual, recommendations } = mlResponse.data;
@@ -77,12 +82,31 @@ exports.getPrediction = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Prediction Error:", error);
+        console.error("!!! PREDICTION CONTROLLER ERROR !!!");
+        console.error("Error Message:", error.message);
+
         if (error.response) {
-            console.error("ML Service Error Response:", error.response.data);
-            return res.status(error.response.status).json({ success: false, message: error.response.data.message || error.message });
+            console.error("Target URL that failed:", error.config.url);
+            console.error("ML Service Status Code:", error.response.status);
+            console.error("ML Service Error Body:", error.response.data);
+
+            return res.status(error.response.status).json({
+                success: false,
+                error: 'ML_SERVICE_FAILURE',
+                statusCode: error.response.status,
+                message: error.response.data.message || error.message,
+                debug: {
+                    targetUrl: error.config.url,
+                    responseData: error.response.data
+                }
+            });
         }
-        res.status(500).json({ success: false, message: error.message });
+
+        res.status(500).json({
+            success: false,
+            error: 'INTERNAL_BACKEND_ERROR',
+            message: error.message
+        });
     }
 };
 
