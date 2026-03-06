@@ -11,7 +11,7 @@ app.use(cors({
     origin: ['https://diabetes-admin-panel.web.app', 'https://diabetes-pred-f3d59.web.app', 'https://diabetes-backend-hfw2.onrender.com', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
 }));
 app.use(express.json());
 app.use((req, res, next) => {
