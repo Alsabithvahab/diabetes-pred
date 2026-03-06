@@ -7,6 +7,14 @@ const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 const app = express();
+
+// VERBOSE LOGGING - Must be at the very top
+app.use((req, res, next) => {
+    console.log(`>>> INCOMING REQUEST: ${req.method} ${req.originalUrl}`);
+    console.log(`>>> ORIGIN: ${req.get('origin')}`);
+    next();
+});
+
 app.use(cors({
     origin: [
         'https://diabetes-admin-panel.web.app',
