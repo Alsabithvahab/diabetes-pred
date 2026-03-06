@@ -17,8 +17,9 @@ export default function Login() {
         e.preventDefault();
         setLoading(true);
         setError('');
+        const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
         try {
-            const res = await axios.post('http://localhost:5001/api/auth/login', { email, password });
+            const res = await axios.post(`${API_BASE}/auth/login`, { email, password });
             if (res.data.user.isAdmin) {
                 loginUser(res.data.user, res.data.token);
                 // Save to admin-specific local storage in context handled this, but ensuring persistence

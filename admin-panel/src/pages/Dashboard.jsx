@@ -35,7 +35,8 @@ export default function Dashboard() {
         const fetchAllPredictions = async () => {
             try {
                 const token = localStorage.getItem('admin_token');
-                const res = await axios.get('http://localhost:5001/api/predictions/all', {
+                const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+                const res = await axios.get(`${API_BASE}/predictions/all`, {
                     headers: { 'x-auth-token': token }
                 });
                 setPredictions(res.data.data);
@@ -140,7 +141,8 @@ export default function Dashboard() {
 
         try {
             const token = localStorage.getItem('admin_token');
-            await axios.delete(`http://localhost:5001/api/predictions/all/${id}`, {
+            const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+            await axios.delete(`${API_BASE}/predictions/all/${id}`, {
                 headers: { 'x-auth-token': token }
             });
             setPredictions(prev => prev.filter(p => p._id !== id));

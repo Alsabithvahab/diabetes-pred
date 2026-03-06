@@ -1,0 +1,6 @@
+@echo off
+echo Building Frontend...
+call npm run build --prefix frontend
+echo Deploying to Firebase...
+firebase deploy --only hosting
+echo Done!

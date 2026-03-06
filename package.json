@@ -8,6 +8,8 @@
     "start-admin": "npm start --prefix admin-panel",
     "start-backend": "node backend/server.js",
     "start-ml": "python ml-service/app.py",
+    "build-frontend": "npm run build --prefix frontend",
+    "deploy-frontend": "npm run build --prefix frontend && npx firebase-tools deploy --only hosting",
     "dev": "npx concurrently \"npm run start-ml\" \"npm run start-backend\" \"npm run start-frontend\" \"npm run start-admin\""
   },
   "dependencies": {
