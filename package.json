@@ -13,6 +13,7 @@
     "dev": "npx concurrently \"npm run start-ml\" \"npm run start-backend\" \"npm run start-frontend\" \"npm run start-admin\""
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "firebase": "^12.10.0"
   }
 }
