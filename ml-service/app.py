@@ -9,6 +9,10 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({"status": "ML Service is live", "model_loaded": model is not None})
+
 MODEL_PATH = 'model.pkl'
 if os.path.exists(MODEL_PATH):
     model_data = joblib.load(MODEL_PATH)

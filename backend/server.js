@@ -29,13 +29,20 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/predictions', predictionRoutes);
 
-// Health check
-app.get('/health', (req, res) => res.json({ status: 'ok', db: global.dbConnected }));
+// Root routes
+app.get('/', (req, res) => res.send('Diabetes Backend API is running...'));
+app.get('/health', (req, res) => res.json({ status: 'ok', db: global.dbConnected, env: process.env.NODE_ENV }));
 
-// Catch-all 404 handler for debugging
+// Catch-all 404 handler for debugging (must be last)
 app.use((req, res) => {
-    console.log(`404 Not Found: ${req.method} ${req.url}`);
-    res.status(404).json({ success: false, message: `Route ${req.method} ${req.url} not found on this server` });
+    console.log(`404 Not Found: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({
+        success: false,
+        error: 'ROUTE_NOT_FOUND',
+        requestedUrl: req.originalUrl,
+        method: req.method,
+        message: `The requested route ${req.method} ${req.originalUrl} does not exist on this server.`
+    });
 });
 
 const PORT = process.env.PORT || 5001;
