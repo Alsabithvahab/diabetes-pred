@@ -8,24 +8,19 @@ const authRoutes = require('./routes/authRoutes');
 dotenv.config();
 const app = express();
 app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [
-            'https://diabetes-admin-panel.web.app',
-            'https://diabetes-pred-f3d59.web.app',
-            'https://diabetes-admin-f3d59.web.app',
-            'http://localhost:3000'
-        ];
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: [
+        'https://diabetes-admin-panel.web.app',
+        'https://diabetes-admin-panel.firebaseapp.com',
+        'https://diabetes-pred-f3d59.web.app',
+        'https://diabetes-pred-f3d59.firebaseapp.com',
+        'https://diabetes-admin-f3d59.web.app',
+        'https://diabetes-admin-f3d59.firebaseapp.com',
+        'http://localhost:3000'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'Accept', 'X-Requested-With']
 }));
-app.options('*', cors());
 app.use(express.json());
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
