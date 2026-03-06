@@ -1,0 +1,42 @@
+services:
+  # 1. ML Service (Python/Flask)
+  - type: web
+    name: diabetes-ml-service
+    env: python
+    buildCommand: pip install -r ml-service/requirements.txt
+    startCommand: gunicorn --chdir ml-service app:app
+    envVars:
+      - key: PORT
+        value: 5000
+
+  # 2. Backend Service (Node.js/Express)
+  - type: web
+    name: diabetes-backend
+    env: node
+    buildCommand: npm install --prefix backend
+    startCommand: node backend/server.js
+    envVars:
+      - key: MONGO_URI
+        sync: false # User needs to set this in Render UI
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ML_SERVICE_URL
+        fromService:
+          name: diabetes-ml-service
+          type: web
+          property: host
+      - key: PORT
+        value: 5001
+
+  # 3. Frontend (Static - Alternatively use Firebase)
+  # - type: web
+  #   name: diabetes-frontend
+  #   env: static
+  #   buildCommand: npm install --prefix frontend && npm run build --prefix frontend
+  #   publishPath: frontend/build
+  #   envVars:
+  #     - key: REACT_APP_API_URL
+  #       fromService:
+  #         name: diabetes-backend
+  #         type: web
+  #         property: host
