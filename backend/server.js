@@ -8,7 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 dotenv.config();
 const app = express();
 app.use(cors({
-    origin: '*',
+    origin: ['https://diabetes-admin-panel.web.app', 'https://diabetes-backend-hfw2.onrender.com', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
