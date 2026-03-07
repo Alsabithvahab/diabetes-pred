@@ -90,11 +90,16 @@ exports.getPrediction = async (req, res) => {
             console.error("ML Service Status Code:", error.response.status);
             console.error("ML Service Error Body:", error.response.data);
 
+            let userMessage = error.response.data.message || error.message;
+            if (error.response.status === 429) {
+                userMessage = "The AI service is currently receiving too many requests. Please wait a moment and try again.";
+            }
+
             return res.status(error.response.status).json({
                 success: false,
-                error: 'ML_SERVICE_FAILURE',
+                error: error.response.status === 429 ? 'RATE_LIMIT_EXCEEDED' : 'ML_SERVICE_FAILURE',
                 statusCode: error.response.status,
-                message: error.response.data.message || error.message,
+                message: userMessage,
                 debug: {
                     targetUrl: error.config.url,
                     responseData: error.response.data

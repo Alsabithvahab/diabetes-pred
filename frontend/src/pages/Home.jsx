@@ -51,6 +51,33 @@ export default function Home() {
     });
     useEffect(() => {
         const detectLocation = async () => {
+            // 1. Check for cached location (24-hour expiration)
+            const CACHE_KEY = 'detected-location';
+            const CACHE_TIME_KEY = 'detected-location-time';
+            const cachedLoc = localStorage.getItem(CACHE_KEY);
+            const cachedTime = localStorage.getItem(CACHE_TIME_KEY);
+            const now = Date.now();
+
+            if (cachedLoc && cachedTime && (now - Number(cachedTime) < 24 * 60 * 60 * 1000)) {
+                console.log("Using CACHED location:", cachedLoc);
+                setForm(prev => ({ ...prev, location: cachedLoc }));
+                return;
+            }
+
+            // Function to fetch with timeout
+            const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                try {
+                    const response = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(id);
+                    return response;
+                } catch (e) {
+                    clearTimeout(id);
+                    throw e;
+                }
+            };
+
             // Try high-precision browser geolocation first
             if (navigator.geolocation) {
                 console.log("Requesting high-accuracy GPS location...");
@@ -58,47 +85,63 @@ export default function Home() {
                     async (position) => {
                         const { latitude, longitude } = position.coords;
                         try {
-                            const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
-                            const data = await res.json();
+                            const res = await fetchWithTimeout(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
 
-                            // Try to get the most specific location info possible
+                            if (res.status === 429) {
+                                console.warn("BigDataCloud rate limited (429).");
+                                throw new Error("RATE_LIMITED");
+                            }
+
+                            const data = await res.json();
                             const city = data.city || data.locality || data.localityInfo?.administrative?.find(a => a.adminLevel === 4)?.name || '';
                             const state = data.principalSubdivision || data.region || '';
                             const detailedLoc = city ? `${city}, ${state}` : state;
 
-                            setForm(prev => ({ ...prev, location: detailedLoc }));
-                            console.log("SUCCESS: Exact GPS Location detected:", detailedLoc);
+                            if (detailedLoc) {
+                                setForm(prev => ({ ...prev, location: detailedLoc }));
+                                localStorage.setItem(CACHE_KEY, detailedLoc);
+                                localStorage.setItem(CACHE_TIME_KEY, now.toString());
+                                console.log("SUCCESS: GPS Location detected & cached:", detailedLoc);
+                            }
                         } catch (err) {
-                            console.error("Reverse geocoding failed:", err);
-                            setForm(prev => ({ ...prev, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
+                            console.error("Reverse geocoding failed/timed out:", err);
+                            const fallback = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                            setForm(prev => ({ ...prev, location: fallback }));
                         }
                     },
                     async (error) => {
                         if (error.code === 1) {
                             console.warn("User DENIED location permission. Falling back to IP.");
-                            alert("To get your EXACT location for the assessment, please allow location access in your browser settings.");
                         } else {
-                            console.warn("Geolocation failed (timeout/unavailable). Code:", error.code, "Message:", error.message);
+                            console.warn("Geolocation failed. Code:", error.code);
                         }
 
                         // Fallback to IP-based detection
                         try {
                             console.log("Attempting IP-based location fallback...");
-                            const res = await fetch('https://ipapi.co/json/');
+                            const res = await fetchWithTimeout('https://ipapi.co/json/');
+
+                            if (res.status === 429) {
+                                console.warn("ipapi.co rate limited (429). Using default.");
+                                return;
+                            }
+
                             const data = await res.json();
                             if (data.region) {
                                 const fallbackLoc = data.city ? `${data.city}, ${data.region}` : data.region;
                                 setForm(prev => ({ ...prev, location: fallbackLoc }));
-                                console.log("IP Fallback Location detected (less accurate):", fallbackLoc);
+                                localStorage.setItem(CACHE_KEY, fallbackLoc);
+                                localStorage.setItem(CACHE_TIME_KEY, now.toString());
+                                console.log("IP Fallback Location detected & cached:", fallbackLoc);
                             }
                         } catch (ipErr) {
-                            console.error("IP detection fallback failed:", ipErr);
+                            console.error("IP detection fallback failed/timed out:", ipErr);
                         }
                     },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 3600000 }
                 );
             } else {
-                console.error("Geolocation is NOT supported by this browser.");
+                console.error("Geolocation NOT supported.");
             }
         };
         detectLocation();
