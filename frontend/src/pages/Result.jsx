@@ -2,12 +2,29 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
+import { getHistory } from '../services/api';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
 export default function Result() {
     const { state } = useLocation();
     const navigate = useNavigate();
+    const [history, setHistory] = React.useState([]);
+    const [loadingHistory, setLoadingHistory] = React.useState(false);
+
+    React.useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setLoadingHistory(true);
+            getHistory().then(res => {
+                setHistory(res.data.data);
+            }).catch(err => {
+                console.error("Failed to fetch history:", err);
+            }).finally(() => {
+                setLoadingHistory(false);
+            });
+        }
+    }, []);
 
     if (!state?.result || !state?.input) return null;
 
@@ -105,6 +122,59 @@ export default function Result() {
                     </p>
                 </div>
             </div>
+
+            {/* Progress Analysis Section */}
+            {history.length > 1 && (
+                <div className="card progress-card" style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)', border: '1px solid #bbf7d0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                        <div style={{ fontSize: '2rem' }}>✨</div>
+                        <div>
+                            <h3 style={{ margin: 0, color: '#166534' }}>Health Progress Analysis</h3>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#15803d' }}>Comparing current results with your first assessment</p>
+                        </div>
+                    </div>
+
+                    {(() => {
+                        const first = history[history.length - 1]; // Use the oldest record
+                        const currentProb = probability * 100;
+                        const firstProb = first.probability * 100;
+                        const diff = currentProb - firstProb;
+                        const isImprovement = diff < 0;
+
+                        return (
+                            <div className="progress-content" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center' }}>
+                                <div style={{ flex: '1', minWidth: '250px' }}>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: isImprovement ? '#166534' : '#991b1b', marginBottom: '0.5rem' }}>
+                                        {isImprovement 
+                                            ? `Great job! Your risk has decreased by ${Math.abs(diff).toFixed(1)}%`
+                                            : diff === 0 
+                                                ? "Your risk level is stable compared to your first assessment."
+                                                : `Your risk has increased by ${diff.toFixed(1)}% since your first check.`
+                                        }
+                                    </div>
+                                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#374151' }}>
+                                        {isImprovement 
+                                            ? "The changes in your health metrics are showing positive results. Your body is becoming more resilient to diabetic risk factors."
+                                            : "It's important to monitor these trends. Small adjustments in diet and activity can help bring these numbers back down."
+                                        }
+                                    </p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '1.5rem', textAlign: 'center' }}>
+                                    <div className="stat-box">
+                                        <span className="stat-label">Initial Risk</span>
+                                        <span className="stat-value" style={{ color: getRiskColorCode(first.riskLevel) }}>{firstProb.toFixed(0)}%</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', fontSize: '1.5rem', color: '#94a3b8' }}>→</div>
+                                    <div className="stat-box">
+                                        <span className="stat-label">Current Risk</span>
+                                        <span className="stat-value" style={{ color: getRiskColorCode(risk_level) }}>{currentProb.toFixed(0)}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </div>
+            )}
 
             <div className="result-grid" style={{ gridTemplateColumns: '1fr' }}>
                 {/* Feature Impact Section (SHAP) */}

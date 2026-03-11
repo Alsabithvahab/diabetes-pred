@@ -72,13 +72,17 @@ export default function Dashboard() {
 
     const latest = history[0];
     const previous = history[1];
+    const first = history[history.length - 1];
 
     const getTrendMessage = () => {
         if (!previous) return "First assessment completed.";
-        const diff = (latest.probability - previous.probability) * 100;
-        if (diff > 5) return `⚠️ Risk increased by ${diff.toFixed(1)}% since last check.`;
-        if (diff < -5) return `✅ Risk decreased by ${Math.abs(diff).toFixed(1)}%! Great progress.`;
-        return "Stable: Risk level remains consistent.";
+        const diffFromPrev = (latest.probability - previous.probability) * 100;
+        const diffFromFirst = (latest.probability - first.probability) * 100;
+        
+        if (diffFromFirst < -5) return `✨ Remarkable improvement! Your risk has dropped by ${Math.abs(diffFromFirst).toFixed(1)}% since your first assessment.`;
+        if (diffFromPrev < -5) return `✅ Great progress! Risk decreased by ${Math.abs(diffFromPrev).toFixed(1)}% since last check.`;
+        if (diffFromFirst > 5) return `⚠️ Your risk has increased by ${diffFromFirst.toFixed(1)}% compared to your starting point.`;
+        return "Stable: Your metabolic risk remains consistent.";
     };
 
     return (
@@ -95,8 +99,11 @@ export default function Dashboard() {
                         <div>
                             <p style={{ fontSize: '1.1rem', fontWeight: 600, margin: '0 0 0.5rem 0' }}>{getTrendMessage()}</p>
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: 0 }}>
-                                Current: <strong>{(latest.probability * 100).toFixed(0)}%</strong> ({latest.riskLevel}) |
-                                Previous: <strong>{previous ? (previous.probability * 100).toFixed(0) : 'N/A'}%</strong>
+                                Current: <strong>{(latest.probability * 100).toFixed(0)}%</strong> | 
+                                First Check: <strong>{(first.probability * 100).toFixed(0)}%</strong> | 
+                                Lifetime Change: <strong style={{ color: (latest.probability - first.probability) <= 0 ? 'var(--low)' : 'var(--high)' }}>
+                                    {((latest.probability - first.probability) * 100).toFixed(1)}%
+                                </strong>
                             </p>
                         </div>
                         <div style={{ textAlign: 'right' }}>
