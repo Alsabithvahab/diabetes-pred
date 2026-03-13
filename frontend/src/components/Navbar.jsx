@@ -35,6 +35,9 @@ export default function Navbar() {
             <div className={`nav-menu ${isOpen ? 'active' : ''}`}>
                 <NavLink to="/" onClick={closeMenu} style={({ isActive }) => ({ color: isActive ? 'var(--primary)' : 'inherit', textDecoration: 'none' })}>Home</NavLink>
                 <NavLink to="/about" onClick={closeMenu} style={({ isActive }) => ({ color: isActive ? 'var(--primary)' : 'inherit', textDecoration: 'none' })}>About</NavLink>
+                {isAuthenticated && (
+                    <NavLink to="/dashboard" onClick={closeMenu} style={({ isActive }) => ({ color: isActive ? 'var(--primary)' : 'inherit', textDecoration: 'none' })}>Monitoring</NavLink>
+                )}
                 {isAuthenticated ? (
                     <button onClick={handleLogout} className="btn btn-danger" style={{ padding: '0.5rem 1.2rem', fontSize: '0.9rem' }}>Logout</button>
                 ) : (

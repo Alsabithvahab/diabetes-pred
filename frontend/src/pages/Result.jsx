@@ -29,7 +29,7 @@ export default function Result() {
     if (!state?.result || !state?.input) return null;
 
     const { probability, risk_level, shap_values, counterfactual, recommendations } = state.result;
-    const { name, age, location, height, weight, glucose, bloodPressure, insulin, genetics, skinThickness, diabetesPedigreeFunction } = state.input;
+    const { name, age, location, height, weight, glucose, bloodPressure, insulin, genetics } = state.input;
 
     const heightInMeters = Number(height) / 100;
     const bmi = (Number(weight) / (heightInMeters * heightInMeters)).toFixed(1);
@@ -124,50 +124,86 @@ export default function Result() {
             </div>
 
             {/* Progress Analysis Section */}
-            {history.length > 1 && (
+            {history.length > 0 && (
                 <div className="card progress-card" style={{ marginBottom: '2rem', background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)', border: '1px solid #bbf7d0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                        <div style={{ fontSize: '2rem' }}>✨</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div style={{ fontSize: '2rem' }}>📈</div>
                         <div>
                             <h3 style={{ margin: 0, color: '#166534' }}>Health Progress Analysis</h3>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#15803d' }}>Comparing current results with your first assessment</p>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#15803d' }}>Tracking changes compared to your previous assessment</p>
                         </div>
                     </div>
 
                     {(() => {
-                        const first = history[history.length - 1]; // Use the oldest record
-                        const currentProb = probability * 100;
-                        const firstProb = first.probability * 100;
-                        const diff = currentProb - firstProb;
+                        // Correctly identify the previous record:
+                        // If physics[0] matches current, previous is physics[1]
+                        const isCurrentInHistory = history[0] && history[0].probability.toFixed(4) === probability.toFixed(4) && history[0].glucose === Number(glucose);
+                        const previous = isCurrentInHistory ? history[1] : history[0];
+                        
+                        if (!previous) {
+                            return <p style={{ color: '#64748b', fontStyle: 'italic' }}>This is your first recorded assessment. Subsequent tests will show detailed progress comparisons here.</p>;
+                        }
+
+                        const currentProb = (probability * 100);
+                        const prevProb = (previous.probability * 100);
+                        const diff = currentProb - prevProb;
                         const isImprovement = diff < 0;
 
+                        // Metric differences
+                        const glucoseDiff = Number(glucose) - previous.glucose;
+                        const bmiDiff = Number(bmi) - previous.bmi;
+
                         return (
-                            <div className="progress-content" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center' }}>
-                                <div style={{ flex: '1', minWidth: '250px' }}>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: isImprovement ? '#166534' : '#991b1b', marginBottom: '0.5rem' }}>
+                            <div className="progress-content">
+                                <div style={{ marginBottom: '2rem' }}>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: 700, color: isImprovement ? '#166534' : diff === 0 ? '#475569' : '#991b1b', marginBottom: '0.5rem' }}>
                                         {isImprovement 
-                                            ? `Great job! Your risk has decreased by ${Math.abs(diff).toFixed(1)}%`
+                                            ? `✨ Progress Detected! Your risk has improved by ${Math.abs(diff).toFixed(1)}%`
                                             : diff === 0 
-                                                ? "Your risk level is stable compared to your first assessment."
-                                                : `Your risk has increased by ${diff.toFixed(1)}% since your first check.`
+                                                ? "Your risk level is stable compared to your last check."
+                                                : `📈 Trend Alert: Risk increased by ${diff.toFixed(1)}% since last time.`
                                         }
                                     </div>
-                                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#374151' }}>
-                                        {isImprovement 
-                                            ? "The changes in your health metrics are showing positive results. Your body is becoming more resilient to diabetic risk factors."
-                                            : "It's important to monitor these trends. Small adjustments in diet and activity can help bring these numbers back down."
-                                        }
-                                    </p>
+                                    <div style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#374151', background: 'rgba(255,255,255,0.5)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                                        <strong>Change Drivers:</strong> {Math.abs(glucoseDiff) > 0 || Math.abs(bmiDiff) > 0 ? (
+                                            <>
+                                                {glucoseDiff !== 0 && (
+                                                    <span>Your Glucose level {glucoseDiff > 0 ? 'increased' : 'decreased'} by {Math.abs(glucoseDiff)} mg/dL. </span>
+                                                )}
+                                                {bmiDiff !== 0 && (
+                                                    <span>Your BMI {bmiDiff > 0 ? 'rose' : 'fell'} by {Math.abs(bmiDiff.toFixed(1))}. </span>
+                                                )}
+                                                {isImprovement 
+                                                    ? "These positive shifts in your metabolic indicators are directly reducing your systemic risk."
+                                                    : diff > 0 
+                                                        ? "These upward trends in your core metrics are the primary reason for the increased risk probability."
+                                                        : "Your metrics have balanced out to maintain a consistent risk level."}
+                                            </>
+                                        ) : "Your core metrics (Glucose and BMI) are identical to your previous test, resulting in a stable risk profile."}
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '1.5rem', textAlign: 'center' }}>
-                                    <div className="stat-box">
-                                        <span className="stat-label">Initial Risk</span>
-                                        <span className="stat-value" style={{ color: getRiskColorCode(first.riskLevel) }}>{firstProb.toFixed(0)}%</span>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                                    <div className="stat-box" style={{ padding: '1.25rem' }}>
+                                        <span className="stat-label">Previous Glucose</span>
+                                        <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>{previous.glucose} <span style={{ fontSize: '0.8rem', fontWeight: 400 }}>mg/dL</span></span>
+                                        <div style={{ fontSize: '0.8rem', color: glucoseDiff < 0 ? '#22c55e' : glucoseDiff > 0 ? '#ef4444' : '#64748b', fontWeight: 700, marginTop: '4px' }}>
+                                            {glucoseDiff < 0 ? `↓ ${Math.abs(glucoseDiff)} Better` : glucoseDiff > 0 ? `↑ ${glucoseDiff} Higher` : 'No Change'}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', fontSize: '1.5rem', color: '#94a3b8' }}>→</div>
-                                    <div className="stat-box">
-                                        <span className="stat-label">Current Risk</span>
-                                        <span className="stat-value" style={{ color: getRiskColorCode(risk_level) }}>{currentProb.toFixed(0)}%</span>
+                                    <div className="stat-box" style={{ padding: '1.25rem' }}>
+                                        <span className="stat-label">Previous BMI</span>
+                                        <span style={{ fontSize: '1.5rem', fontWeight: 800 }}>{previous.bmi}</span>
+                                        <div style={{ fontSize: '0.8rem', color: bmiDiff < 0 ? '#22c55e' : bmiDiff > 0 ? '#ef4444' : '#64748b', fontWeight: 700, marginTop: '4px' }}>
+                                            {bmiDiff < 0 ? `↓ ${Math.abs(bmiDiff).toFixed(1)} Reduced` : bmiDiff > 0 ? `↑ ${bmiDiff.toFixed(1)} Increased` : 'Stable'}
+                                        </div>
+                                    </div>
+                                    <div className="stat-box" style={{ padding: '1.25rem', background: 'var(--primary-light)', border: '1px solid var(--primary)' }}>
+                                        <span className="stat-label">Previous Risk</span>
+                                        <span style={{ fontSize: '1.5rem', fontWeight: 800, color: getRiskColorCode(previous.riskLevel) }}>{prevProb.toFixed(0)}%</span>
+                                        <div style={{ fontSize: '0.8rem', color: isImprovement ? '#22c55e' : diff > 0 ? '#ef4444' : '#64748b', fontWeight: 700, marginTop: '4px' }}>
+                                            {isImprovement ? `↓ ${Math.abs(diff).toFixed(1)}% Improved` : diff > 0 ? `↑ ${diff.toFixed(1)}% Increased` : 'Steady'}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -189,9 +225,7 @@ export default function Result() {
                                 'BMI': 'Body Mass Index (BMI)',
                                 'Age': 'Age',
                                 'Genetics': 'Family History',
-                                'Insulin': 'Insulin Level',
-                                'SkinThickness': 'Skin Thickness',
-                                'DiabetesPedigreeFunction': 'Genetic Pedigree'
+                                'Insulin': 'Insulin Level'
                             };
 
                             const featureValues = {
@@ -200,9 +234,7 @@ export default function Result() {
                                 'BMI': `${bmi} kg/m²`,
                                 'Age': `${age} Years`,
                                 'Genetics': genetics === 'Yes' ? 'Present' : 'None',
-                                'Insulin': `${insulin || 0} mu U/ml`,
-                                'SkinThickness': `${state.input.skinThickness || 0} mm`,
-                                'DiabetesPedigreeFunction': (state.input.diabetesPedigreeFunction || 0.47).toFixed(3)
+                                'Insulin': `${insulin || 0} mu U/ml`
                             };
 
                             // Filter and sort SHAP values by their absolute impact

@@ -18,19 +18,36 @@ const writeLocal = (data) => {
 
 exports.getPrediction = async (req, res) => {
     try {
-        console.log("Received prediction request:", req.body);
-        let {
+        const {
             name, location, age, glucose,
             bloodPressure, skinThickness, insulin, bmi,
             diabetesPedigreeFunction, genetics
         } = req.body;
 
-        // Apply defaults if missing (for cases where they are removed from UI)
-        if (skinThickness === undefined || skinThickness === null) skinThickness = 0;
-        if (bmi === undefined || bmi === null) bmi = 25.0;
-        if (diabetesPedigreeFunction === undefined || diabetesPedigreeFunction === null) diabetesPedigreeFunction = 0.47;
+        // 1. ROBUST INPUT VALIDATION & CASTING
+        const numericFields = {
+            glucose: parseFloat(glucose),
+            bloodPressure: parseFloat(bloodPressure),
+            insulin: parseFloat(insulin || 0),
+            bmi: parseFloat(bmi || 25.0),
+            age: parseFloat(age)
+        };
 
-        let mlServiceUrl = 'https://diabetes-pred-rppa.onrender.com';
+        // Check for NaN in required fields
+        const requiredFields = ['glucose', 'bloodPressure', 'age'];
+        for (const field of requiredFields) {
+            if (isNaN(numericFields[field])) {
+                console.warn(`!!! Missing or invalid required field: ${field}`);
+                return res.status(400).json({
+                    success: false,
+                    error: 'INVALID_INPUT',
+                    message: `Please provide a valid numeric value for ${field}.`
+                });
+            }
+        }
+
+        let mlServiceUrl = process.env.ML_SERVICE_URL || 'http://localhost:5000';
+        
         // Normalize URL: ensure protocol and remove trailing slash
         if (!mlServiceUrl.startsWith('http')) {
             mlServiceUrl = `http://${mlServiceUrl}`;
@@ -38,18 +55,20 @@ exports.getPrediction = async (req, res) => {
         mlServiceUrl = mlServiceUrl.replace(/\/+$/, '');
 
         const targetUrl = `${mlServiceUrl}/predict`;
-        console.log(`>>> CALLING ML SERVICE: ${targetUrl}`);
+        console.log(`>>> CALLING ML SERVICE: ${targetUrl} with data:`, numericFields);
 
         const mlResponse = await axios.post(targetUrl, {
-            glucose, bloodPressure, skinThickness,
-            insulin, bmi, diabetesPedigreeFunction, age, genetics
+            ...numericFields,
+            skinThickness: 0,
+            diabetesPedigreeFunction: 0.47,
+            genetics
         }, { timeout: 15000 });
 
         console.log("ML service response received");
         const { probability, risk_level, shap_values, lime_explanation, counterfactual, recommendations } = mlResponse.data;
 
         const result = {
-            name, age, glucose, bloodPressure, bmi, genetics, location,
+            name, age, glucose, bloodPressure, insulin: numericFields.insulin, bmi, genetics, location,
             probability, riskLevel: risk_level, shapSummary: shap_values,
             userId: req.user ? req.user.id : null,
             date: new Date()

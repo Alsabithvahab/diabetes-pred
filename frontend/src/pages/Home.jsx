@@ -168,9 +168,7 @@ export default function Home() {
                 glucose: Number(form.glucose),
                 bloodPressure: Number(form.bloodPressure),
                 insulin: Number(form.insulin),
-                skinThickness: 0,
-                bmi: Number(calculatedBmi.toFixed(1)),
-                diabetesPedigreeFunction: 0.47
+                bmi: Number(calculatedBmi.toFixed(1))
             });
             navigate('/result', { state: { result: res.data.data, input: form } });
         } catch (err) {
@@ -267,9 +265,11 @@ export default function Home() {
                     />
                 </div>
 
-                <div className="dashboard-footer">
-                    <Link to="/dashboard" className="dashboard-link">
-                        View Risk Monitoring Dashboard &rarr;
+                <div className="dashboard-footer" style={{ marginTop: '4rem', padding: '2rem', background: 'var(--primary-light)', borderRadius: '16px', border: '1px dashed var(--primary)' }}>
+                    <h3 style={{ margin: 0, color: 'var(--primary-dark)' }}>📈 Continuous Health Monitoring</h3>
+                    <p style={{ color: 'var(--text-muted)', margin: '0.5rem 0 1.5rem' }}>Track your progress over time and see how your vitals impact your long-term health baseline.</p>
+                    <Link to="/dashboard" className="btn btn-primary">
+                        Access Monitoring Dashboard &rarr;
                     </Link>
                 </div>
             </section>

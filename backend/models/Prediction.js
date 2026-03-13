@@ -17,6 +17,7 @@ const PredictionSchema = new mongoose.Schema({
             effect: String
         }
     ],
+    insulin: { type: Number, required: false },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     date: { type: Date, default: Date.now }
 });

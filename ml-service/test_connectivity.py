@@ -5,10 +5,8 @@ url = "http://localhost:5000/predict"
 data = {
     "glucose": 140,
     "bloodPressure": 80,
-    "skinThickness": 20,
     "insulin": 80,
     "bmi": 26.5,
-    "diabetesPedigreeFunction": 0.5,
     "age": 45,
     "genetics": "Yes"
 }

@@ -160,6 +160,8 @@ def predict():
     
     shap_summary = []
     for f, v in zip(features, current_shap):
+        if f in ['SkinThickness', 'DiabetesPedigreeFunction']:
+            continue
         val = v[0] if isinstance(v, (list, np.ndarray)) else v
         shap_summary.append({
             "feature": f, 
