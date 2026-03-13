@@ -7,7 +7,7 @@ import shap
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 @app.route('/', methods=['GET'])
 def home():
