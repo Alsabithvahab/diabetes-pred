@@ -44,8 +44,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/predictions', predictionRoutes);
 
 // Root routes
-app.get('/', (req, res) => res.send('Diabetes Backend API is running...'));
-app.get('/health', (req, res) => res.json({ status: 'ok', db: global.dbConnected, env: process.env.NODE_ENV }));
+app.get('/', (req, res) => res.send('Diabetes Backend API is running... v3'));
+app.get('/health', (req, res) => res.json({ status: 'ok', db: global.dbConnected, env: process.env.NODE_ENV, version: 'v3' }));
+
+// Test POST endpoint to verify POST requests work on Render
+app.post('/test-post', (req, res) => {
+    console.log('>>> TEST POST received:', req.body);
+    res.json({ success: true, message: 'POST works!', body: req.body, version: 'v3' });
+});
 
 // Catch-all 404 handler for debugging (must be last)
 app.use((req, res) => {
