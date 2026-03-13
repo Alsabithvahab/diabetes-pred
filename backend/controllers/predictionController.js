@@ -68,26 +68,36 @@ exports.getPrediction = async (req, res) => {
         const { probability, risk_level, shap_values, lime_explanation, counterfactual, recommendations } = mlResponse.data;
 
         const result = {
-            name, age, glucose, bloodPressure, insulin: numericFields.insulin, bmi, genetics, location,
-            probability, riskLevel: risk_level, shapSummary: shap_values,
-            userId: req.user ? req.user.id : null,
+            name, 
+            age: numericFields.age, 
+            glucose: numericFields.glucose, 
+            bloodPressure: numericFields.bloodPressure, 
+            insulin: numericFields.insulin, 
+            bmi: numericFields.bmi, 
+            genetics, 
+            location,
+            probability, 
+            riskLevel: risk_level, 
+            shapSummary: shap_values,
+            userId: req.user ? (req.user.id || req.user._id) : null,
             date: new Date()
         };
 
+        console.log(`>>> PREDICTION READY TO SAVE. UserID: ${result.userId || 'GUEST'}. DB Connected: ${global.dbConnected}`);
+
         if (global.dbConnected) {
-            console.log("Saving to MongoDB");
+            console.log(">>> Attempting MongoDB Save...");
             const newPrediction = new Prediction(result);
             const saved = await newPrediction.save();
             result._id = saved._id;
-            console.log("Saved to MongoDB:", result._id);
+            console.log(">>> MongoDB Save SUCCESS:", result._id);
         } else {
             result._id = Date.now().toString();
-            console.log("Saving to local JSON");
+            console.log(">>> DB NOT CONNECTED. Falling back to Local JSON Save.");
             writeLocal(result);
-            console.log("Saved to local JSON");
         }
 
-        console.log("Prediction success. Returning result.");
+        console.log(">>> Returning success to frontend.");
         res.status(200).json({
             success: true,
             data: {
@@ -137,12 +147,17 @@ exports.getPrediction = async (req, res) => {
 exports.getHistory = async (req, res) => {
     try {
         let history;
+        console.log(`>>> FETCHING HISTORY for UserID: ${req.user ? (req.user.id || req.user._id) : 'NONE'}. DB Connected: ${global.dbConnected}`);
+
         if (global.dbConnected) {
-            history = await Prediction.find({ userId: req.user.id }).sort({ date: -1 });
+            history = await Prediction.find({ userId: req.user.id || req.user._id }).sort({ date: -1 });
+            console.log(`>>> MongoDB History Found: ${history.length} items.`);
         } else {
+            const userId = req.user.id || req.user._id;
             history = readLocal()
-                .filter(h => h.userId === req.user.id)
+                .filter(h => h.userId === userId)
                 .sort((a, b) => new Date(b.date) - new Date(a.date));
+            console.log(`>>> Local JSON History Found: ${history.length} items for UserID: ${userId}.`);
         }
         res.status(200).json({ success: true, data: history });
     } catch (error) {
