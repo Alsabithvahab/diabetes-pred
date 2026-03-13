@@ -126,13 +126,14 @@ exports.getPrediction = async (req, res) => {
             console.error("ML Service Error Body:", error.response.data);
 
             let userMessage = error.response.data.message || error.message;
-            if (error.response.status === 429) {
-                userMessage = "The AI service is currently receiving too many requests. Please wait a moment and try again.";
+            if (error.response.status === 403) {
+                userMessage = "ML Service Error: Forbidden. The AI engine rejected the request.";
             }
 
             return res.status(error.response.status).json({
                 success: false,
-                error: error.response.status === 429 ? 'RATE_LIMIT_EXCEEDED' : 'ML_SERVICE_FAILURE',
+                error: 'ML_SERVICE_FAILURE',
+                source: 'ML_SERVICE', // Tag the source
                 statusCode: error.response.status,
                 message: userMessage,
                 debug: {
@@ -144,7 +145,8 @@ exports.getPrediction = async (req, res) => {
 
         res.status(500).json({
             success: false,
-            error: 'INTERNAL_BACKEND_ERROR',
+            error: 'BACKEND_CRASH',
+            source: 'BACKEND',
             message: error.message
         });
     }

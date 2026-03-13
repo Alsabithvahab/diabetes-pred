@@ -16,27 +16,7 @@ app.use((req, res, next) => {
 });
 
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl)
-        if (!origin) return callback(null, true);
-        
-        const allowedOrigins = [
-            'https://diabetes-admin-panel.web.app',
-            'https://diabetes-admin-panel.firebaseapp.com',
-            'https://diabetes-pred-f3d59.web.app',
-            'https://diabetes-pred-f3d59.firebaseapp.com',
-            'https://diabetes-admin-f3d59.web.app',
-            'https://diabetes-admin-f3d59.firebaseapp.com',
-            'http://localhost:3000'
-        ];
-
-        if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('web.app') || origin.includes('firebaseapp.com')) {
-            callback(null, true);
-        } else {
-            console.warn(`>>> CORS REJECTED ORIGIN: ${origin}`);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true, // Reflect the request origin
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'Accept', 'X-Requested-With', 'Origin']
