@@ -55,16 +55,22 @@ exports.getPrediction = async (req, res) => {
         mlServiceUrl = mlServiceUrl.replace(/\/+$/, '');
 
         const targetUrl = `${mlServiceUrl}/predict`;
-        console.log(`>>> CALLING ML SERVICE: ${targetUrl} with data:`, numericFields);
+        console.log(`>>> [BACKEND] Calling ML Service: ${targetUrl}`);
 
         const mlResponse = await axios.post(targetUrl, {
             ...numericFields,
             skinThickness: 0,
             diabetesPedigreeFunction: 0.47,
             genetics
-        }, { timeout: 15000 });
+        }, { 
+            timeout: 15000,
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Diabetes-Backend/1.0'
+            }
+        });
 
-        console.log("ML service response received");
+        console.log(">>> [ML SERVICE] Response SUCCESS.");
         const { probability, risk_level, shap_values, lime_explanation, counterfactual, recommendations } = mlResponse.data;
 
         const result = {
