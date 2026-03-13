@@ -8,15 +8,29 @@ const authRoutes = require('./routes/authRoutes');
 dotenv.config();
 const app = express();
 
-// VERBOSE LOGGING - Must be at the very top
+// Trust Render's proxy (Cloudflare) - CRITICAL for avoiding 403
+app.set('trust proxy', 1);
+
+// Explicit preflight handler - runs BEFORE everything
+app.options('*', (req, res) => {
+    res.set({
+        'Access-Control-Allow-Origin': req.get('origin') || '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-auth-token, Accept, X-Requested-With, Origin',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400'
+    });
+    res.status(204).end();
+});
+
+// VERBOSE LOGGING
 app.use((req, res, next) => {
-    console.log(`>>> INCOMING REQUEST: ${req.method} ${req.originalUrl}`);
-    console.log(`>>> ORIGIN: ${req.get('origin')}`);
+    console.log(`>>> ${req.method} ${req.originalUrl} from ${req.get('origin') || 'no-origin'}`);
     next();
 });
 
 app.use(cors({
-    origin: true, // Reflect the request origin
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'Accept', 'X-Requested-With', 'Origin']
